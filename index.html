@@ -699,7 +699,7 @@
         }
 
         // =============================================
-        // CONSULTA CNPJ NA RECEITA WS (ATUALIZADA)
+        // CONSULTA CNPJ COM OPEN CNPJ (API OFICIAL)
         // =============================================
 
         async function consultarCNPJ(cnpj) {
@@ -725,37 +725,31 @@
                 const cnpjNumeros = cnpj.replace(/\D/g, '');
                 
                 // Verificar se é um CNPJ válido antes de consultar
-                if (cnpjNumeros.length !== 14) {
-                    throw new Error('CNPJ deve ter 14 dígitos');
+                if (cnpjNumeros.length !== 14 || !validarCNPJ(cnpjNumeros)) {
+                    throw new Error('CNPJ inválido');
                 }
                 
-                // Configuração para a API CNPJA
-        const apiKey = '1df95279-b174-4c39-bef4-67e9b1e2e9ea-0c9d7930-13d1-4c38-8988-1eb6cedfab01'; // ← Substitua pela sua chave
-        const response = await fetch(`https://api.cnpja.com/office/${cnpjNumeros}`, {
-            headers: {
-                'Authorization': 1df95279-b174-4c39-bef4-67e9b1e2e9ea-0c9d7930-13d1-4c38-8988-1eb6cedfab01
-            }
+                // Fazer a consulta na API Open CNPJ
+                const response = await fetch(`https://open.cnpja.com/office/${cnpjNumeros}`, {
+                    headers: {
+                        'Authorization': 'Bearer 1df95279-b174-4c39-bef4-67e9b1e2e9ea-0c9d7930-13d1-4c38-8988-1eb6cedfab01'
+                    }
+                });
                 
                 if (!response.ok) {
-                    throw new Error('Erro na consulta à API');
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erro na consulta à API');
                 }
                 
                 const data = await response.json();
                 
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
                 // Preencher APENAS o campo de Razão Social
-                if (data.company && data.company.name) {
-    // Remove possíveis números do início (como "44.416.409" no exemplo)
-    const razaoSocial = data.company.name.replace(/^\d+\.?\d*\s*/, '').trim();
-    nomeRazaoInput.value = razaoSocial.toUpperCase();
-}
+                if (data.company.name) {
+                    nomeRazaoInput.value = data.name.toUpperCase();
                     document.getElementById('cpfCnpjErro').textContent = 'Razão Social preenchida automaticamente';
                     document.getElementById('cpfCnpjErro').style.color = 'var(--success-color)';
                 } else {
-                    throw new Error('Razão Social não encontrada');
+                    throw new Error('Razão Social não encontrada na resposta');
                 }
                 
             } catch (error) {
@@ -1293,4 +1287,3 @@
         });
     </script>
 </body>
-</html>
