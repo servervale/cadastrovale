@@ -374,7 +374,7 @@
 
                 <div class="form-group">
                     <label>CPF/CNPJ <span>*</span></label>
-                    <input type="text" name="cpf_cnpj" id="cpfCnpj" required oninput="mascaraCpfCnpj(this)" placeholder="000.000.000-00 ou 00.000.000/0000-00">
+                    <input type="text" name="cpf_cnpj" id="cpfCnpj" required placeholder="000.000.000-00 ou 00.000.000/0000-00" maxlength="18">
                     <div id="cpfCnpjErro" class="error"></div>
                 </div>
 
@@ -385,7 +385,8 @@
 
                 <div class="form-group">
                     <label>RG / Inscrição Estadual <span>*</span></label>
-                    <input type="text" name="rg_ie" oninput="mascaraRgIe(this)" required placeholder="00.000.000-0 ou 000.000.000.000">
+                    <input type="text" name="rg_ie" id="rgIe" required placeholder="00.000.000-0 ou 000.000.000.000" maxlength="16">
+                    <div id="rgIeError" class="error"></div>
                 </div>
             </div>
 
@@ -395,13 +396,13 @@
 
                 <div class="form-group">
                     <label>Telefone (obrigatório) <span>*</span></label>
-                    <input type="text" name="telefone1" id="telefone1" required oninput="mascaraTelefone(this)" placeholder="(00) 00000-0000">
+                    <input type="text" name="telefone1" id="telefone1" required placeholder="(00) 00000-0000">
                     <div id="telefoneError" class="error"></div>
                 </div>
 
                 <div class="form-group">
                     <label>Telefone (opcional)</label>
-                    <input type="text" name="telefone2" oninput="mascaraTelefone(this)" placeholder="(00) 0000-0000">
+                    <input type="text" name="telefone2" placeholder="(00) 0000-0000">
                 </div>
 
                 <div class="form-group">
@@ -417,7 +418,7 @@
 
                 <div class="form-group">
                     <label>CEP <span>*</span></label>
-                    <input type="text" name="cep_entrega" id="cepEntrega" required oninput="mascaraCep(this)" placeholder="00000-000">
+                    <input type="text" name="cep_entrega" id="cepEntrega" required placeholder="00000-000">
                     <div id="cepError" class="error"></div>
                 </div>
 
@@ -461,7 +462,7 @@
 
                 <div class="form-group">
                     <label>CEP</label>
-                    <input type="text" name="cep_cobranca" oninput="mascaraCep(this)" placeholder="00000-000">
+                    <input type="text" name="cep_cobranca" placeholder="00000-000">
                 </div>
 
                 <div class="form-group">
@@ -723,6 +724,20 @@
                     }
                 }
                 
+                // Validação do RG/IE (8 a 12 dígitos)
+                const rgIeInput = document.getElementById('rgIe');
+                const rgIeValue = rgIeInput.value.replace(/\D/g, '');
+                
+                if (rgIeValue.length < 8 || rgIeValue.length > 12) {
+                    rgIeInput.classList.add('invalid');
+                    document.getElementById('rgIeError').textContent = 'RG/IE deve ter entre 8 e 12 dígitos';
+                    allValid = false;
+                    if (!errorDisplayed) {
+                        rgIeInput.focus();
+                        errorDisplayed = true;
+                    }
+                }
+                
                 // Validação reforçada para o vendedor
                 const vendedorSelect = document.querySelector('select[name="vendedor"]');
                 if (!vendedorSelect.value) {
@@ -868,6 +883,14 @@
         // Funções de máscara
         function mascaraCpfCnpj(campo) {
             const valor = campo.value.replace(/\D/g, '');
+            
+            // Limita a 14 caracteres
+            if (valor.length > 14) {
+                campo.value = campo.value.substring(0, 18); // 18 = tamanho máximo com máscara
+                return;
+            }
+            
+            // Aplica a máscara conforme o tamanho
             if (valor.length <= 11) {
                 campo.value = valor.replace(/(\d{3})(\d)/, '$1.$2')
                                  .replace(/(\d{3})(\d)/, '$1.$2')
@@ -878,10 +901,16 @@
                                  .replace(/(\d{3})(\d{4})(\d)/, '$1/$2-$3');
             }
             
-            // Limpa mensagem de erro enquanto digita
-            if (document.getElementById('cpfCnpjErro').textContent && valor.length < (valor.length <= 11 ? 11 : 14)) {
-                document.getElementById('cpfCnpjErro').textContent = '';
-                campo.classList.remove('invalid');
+            // Validação em tempo real quando completo
+            if (valor.length === 11 || valor.length === 14) {
+                const validacao = validarCpfCnpj(campo.value);
+                if (!validacao.valido) {
+                    campo.classList.add('invalid');
+                    document.getElementById('cpfCnpjErro').textContent = validacao.mensagem;
+                } else {
+                    campo.classList.remove('invalid');
+                    document.getElementById('cpfCnpjErro').textContent = '';
+                }
             }
         }
 
@@ -915,6 +944,14 @@
 
         function mascaraRgIe(campo) {
             let valor = campo.value.replace(/\D/g, '');
+            
+            // Limita a 12 caracteres
+            if (valor.length > 12) {
+                campo.value = campo.value.substring(0, 16); // 16 = tamanho máximo com máscara
+                return;
+            }
+            
+            // Aplica máscara conforme o tamanho
             if (valor.length <= 9) {
                 valor = valor.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4');
             } else {
@@ -949,12 +986,32 @@
                 });
             });
 
-            // Consulta CNPJ quando completo (14 dígitos)
+            // Configura máscara e validação do CPF/CNPJ
             const cpfCnpjInput = document.getElementById('cpfCnpj');
+            cpfCnpjInput.addEventListener('input', function() {
+                mascaraCpfCnpj(this);
+            });
+            
             cpfCnpjInput.addEventListener('blur', function() {
                 const valor = this.value.replace(/\D/g, '');
-                if (valor.length === 14) {
-                    consultarCNPJ(this.value);
+                if (valor.length > 0 && (valor.length < 11 || (valor.length > 11 && valor.length < 14))) {
+                    this.classList.add('invalid');
+                    document.getElementById('cpfCnpjErro').textContent = 
+                        valor.length < 11 ? 'CPF deve ter 11 dígitos' : 'CNPJ deve ter 14 dígitos';
+                }
+            });
+
+            // Configura máscara do RG/IE
+            const rgIeInput = document.getElementById('rgIe');
+            rgIeInput.addEventListener('input', function() {
+                mascaraRgIe(this);
+            });
+            
+            rgIeInput.addEventListener('blur', function() {
+                const valor = this.value.replace(/\D/g, '');
+                if (valor.length > 0 && (valor.length < 8 || valor.length > 12)) {
+                    this.classList.add('invalid');
+                    document.getElementById('rgIeError').textContent = 'RG/IE deve ter entre 8 e 12 dígitos';
                 }
             });
 
