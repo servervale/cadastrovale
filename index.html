@@ -727,7 +727,6 @@
                         cpfCnpjInput.focus();
                         errorDisplayed = true;
                     }
-                    
                 }
                 
                 // Validação do RG/IE (8 a 12 dígitos)
@@ -742,36 +741,8 @@
                         rgIeInput.focus();
                         errorDisplayed = true;
                     }
-                    const rgIeInput = document.getElementById('rgIe');
-const rgIeValue = rgIeInput.value.replace(/[^\dX]/g, ''); // Mantém números e X
-
-// Verifica se tem entre 8-9 caracteres (permite X apenas no final)
-if (!/^\d{8}[\dX]?$/.test(rgIeValue)) {
-    rgIeInput.classList.add('invalid');
-    document.getElementById('rgIeError').textContent = 'RG deve ter 8 dígitos + X opcional no final (Ex: 12.345.678-X)';
-    allValid = false;
-    if (!errorDisplayed) {
-        rgIeInput.focus();
-        errorDisplayed = true;
-    }
-}
                 }
-                function mascaraRgIe(campo) {
-    // Guarda a posição do cursor
-    const start = campo.selectionStart;
-    const end = campo.selectionEnd;
-    
-    // Remove caracteres não numéricos, exceto X no final
-    let valor = campo.value.replace(/[^\dXx]/g, '');
-    
-    // Converte X para maiúsculo e garante que só tem X no final
-    valor = valor.toUpperCase();
-    const hasX = valor.includes('X');
-    
-    if (hasX) {
-        // Remove todos os X e coloca apenas um no final
-        valor = valor.replace(/X/g, '') + 'X';
-    }
+                
                 // Validação reforçada para o vendedor
                 const vendedorSelect = document.querySelector('select[name="vendedor"]');
                 if (!vendedorSelect.value) {
@@ -1046,19 +1017,7 @@ if (!/^\d{8}[\dX]?$/.test(rgIeValue)) {
             const rgIeInput = document.getElementById('rgIe');
             rgIeInput.addEventListener('input', function() {
                 mascaraRgIe(this);
-            const rgIeValue = rgIeInput.value.replace(/[^\dX]/g, ''); // Mantém números e X
-                
-                if (!/^\d{8}[\dX]?$/.test(rgIeValue)) {
-                    rgIeInput.classList.add('invalid');
-                    document.getElementById('rgIeError').textContent = 'RG deve ter 8 dígitos + X opcional no final (Ex: 12.345.678-X)';
-                    allValid = false;
-                    if (!errorDisplayed) {
-                        rgIeInput.focus();
-                        errorDisplayed = true;
-                    }
-                }
-            
-        });
+            });
             
             rgIeInput.addEventListener('blur', function() {
                 const valor = this.value.replace(/\D/g, '');
