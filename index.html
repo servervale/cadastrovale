@@ -396,13 +396,13 @@
 
                 <div class="form-group">
                     <label>Telefone (obrigatório) <span>*</span></label>
-                    <input type="text" name="telefone1" id="telefone1" required placeholder="(00) 00000-0000">
+                    <input type="text" name="telefone1" id="telefone1" required placeholder="(00) 00000-0000" maxlength="15">
                     <div id="telefoneError" class="error"></div>
                 </div>
 
                 <div class="form-group">
                     <label>Telefone (opcional)</label>
-                    <input type="text" name="telefone2" placeholder="(00) 0000-0000">
+                    <input type="text" name="telefone2" id="telefone2" placeholder="(00) 0000-0000" maxlength="14">
                 </div>
 
                 <div class="form-group">
@@ -418,7 +418,7 @@
 
                 <div class="form-group">
                     <label>CEP <span>*</span></label>
-                    <input type="text" name="cep_entrega" id="cepEntrega" required placeholder="00000-000">
+                    <input type="text" name="cep_entrega" id="cepEntrega" required placeholder="00000-000" maxlength="9">
                     <div id="cepError" class="error"></div>
                 </div>
 
@@ -462,7 +462,7 @@
 
                 <div class="form-group">
                     <label>CEP</label>
-                    <input type="text" name="cep_cobranca" placeholder="00000-000">
+                    <input type="text" name="cep_cobranca" id="cepCobranca" placeholder="00000-000" maxlength="9">
                 </div>
 
                 <div class="form-group">
@@ -881,6 +881,41 @@
         }
 
         // Funções de máscara
+        function mascaraTelefone(campo) {
+            let valor = campo.value.replace(/\D/g, '');
+            
+            // Limita a 11 caracteres (DDD + 9 dígitos)
+            if (valor.length > 11) {
+                valor = valor.substring(0, 11);
+            }
+            
+            // Aplica a máscara
+            if (valor.length > 10) {
+                // Formato para celular: (99) 99999-9999
+                campo.value = valor.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            } else if (valor.length > 6) {
+                // Formato para fixo até 10 dígitos: (99) 9999-9999
+                campo.value = valor.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+            } else if (valor.length > 2) {
+                // Apenas formata o DDD: (99) 
+                campo.value = valor.replace(/(\d{2})/, '($1) ');
+            } else {
+                campo.value = valor;
+            }
+        }
+
+        function mascaraCep(campo) {
+            let valor = campo.value.replace(/\D/g, '');
+            
+            // Limita a 8 caracteres
+            if (valor.length > 8) {
+                valor = valor.substring(0, 8);
+            }
+            
+            // Aplica a máscara: 99999-999
+            campo.value = valor.replace(/(\d{5})(\d{3})/, '$1-$2');
+        }
+
         function mascaraCpfCnpj(campo) {
             const valor = campo.value.replace(/\D/g, '');
             
@@ -911,34 +946,6 @@
                     campo.classList.remove('invalid');
                     document.getElementById('cpfCnpjErro').textContent = '';
                 }
-            }
-        }
-
-        function mascaraTelefone(campo) {
-            const valor = campo.value.replace(/\D/g, '');
-            if (valor.length === 11) {
-                campo.value = valor.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-            } else if (valor.length === 10) {
-                campo.value = valor.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
-            } else {
-                campo.value = valor;
-            }
-            
-            // Limpa mensagem de erro enquanto digita
-            if (document.getElementById('telefoneError').textContent && valor.length < 10) {
-                document.getElementById('telefoneError').textContent = '';
-                campo.classList.remove('invalid');
-            }
-        }
-
-        function mascaraCep(campo) {
-            const valor = campo.value.replace(/\D/g, '');
-            campo.value = valor.replace(/(\d{5})(\d{3})/, '$1-$2');
-            
-            // Limpa mensagem de erro enquanto digita
-            if (document.getElementById('cepError').textContent && valor.length < 8) {
-                document.getElementById('cepError').textContent = '';
-                campo.classList.remove('invalid');
             }
         }
 
@@ -1013,6 +1020,24 @@
                     this.classList.add('invalid');
                     document.getElementById('rgIeError').textContent = 'RG/IE deve ter entre 8 e 12 dígitos';
                 }
+            });
+
+            // Configura máscara para telefones
+            document.getElementById('telefone1').addEventListener('input', function() {
+                mascaraTelefone(this);
+            });
+            
+            document.getElementById('telefone2').addEventListener('input', function() {
+                mascaraTelefone(this);
+            });
+
+            // Configura máscara para CEPs
+            document.getElementById('cepEntrega').addEventListener('input', function() {
+                mascaraCep(this);
+            });
+            
+            document.getElementById('cepCobranca').addEventListener('input', function() {
+                mascaraCep(this);
             });
 
             // Validação de email apenas ao sair do campo
