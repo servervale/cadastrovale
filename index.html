@@ -742,7 +742,22 @@
                         errorDisplayed = true;
                     }
                 }
-                
+                function mascaraRgIe(campo) {
+    // Guarda a posição do cursor
+    const start = campo.selectionStart;
+    const end = campo.selectionEnd;
+    
+    // Remove caracteres não numéricos, exceto X no final
+    let valor = campo.value.replace(/[^\dXx]/g, '');
+    
+    // Converte X para maiúsculo e garante que só tem X no final
+    valor = valor.toUpperCase();
+    const hasX = valor.includes('X');
+    
+    if (hasX) {
+        // Remove todos os X e coloca apenas um no final
+        valor = valor.replace(/X/g, '') + 'X';
+    }
                 // Validação reforçada para o vendedor
                 const vendedorSelect = document.querySelector('select[name="vendedor"]');
                 if (!vendedorSelect.value) {
