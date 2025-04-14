@@ -412,44 +412,57 @@
                 </div>
             </div>
 
-           <!-- Etapa 3: Endereço de Entrega (COM COMPLEMENTO) -->
-<div class="form-step">
-    <h2>Endereço de Entrega</h2>
+            <!-- Etapa 3: Endereço de Entrega (COM COMPLEMENTO) -->
+            <div class="form-step">
+                <h2>Endereço de Entrega</h2>
 
-    <div class="form-group">
-        <label>CEP <span>*</span></label>
-        <input type="text" name="cep_entrega" id="cepEntrega" required placeholder="00000-000" maxlength="9">
-        <div id="cepError" class="error"></div>
-    </div>
+                <div class="form-group">
+                    <label>CEP <span>*</span></label>
+                    <input type="text" name="cep_entrega" id="cepEntrega" required placeholder="00000-000" maxlength="9">
+                    <div id="cepError" class="error"></div>
+                </div>
 
-    <div class="form-group">
-        <label>Endereço <span>*</span></label>
-        <input type="text" name="endereco_entrega" required placeholder="Rua, Avenida, etc." class="uppercase">
-    </div>
+                <div class="form-group">
+                    <label>Endereço <span>*</span></label>
+                    <input type="text" name="endereco_entrega" required placeholder="Rua, Avenida, etc." class="uppercase">
+                </div>
 
-    <div class="form-group">
-        <label>Número <span>*</span></label>
-        <input type="text" name="numero_entrega" required placeholder="Número ou S/N">
-    </div>
+                <div class="form-group">
+                    <label>Número <span>*</span></label>
+                    <input type="text" name="numero_entrega" required placeholder="Número ou S/N">
+                </div>
 
-    <div class="form-group">
-        <label>Bairro <span>*</span></label>
-        <input type="text" name="bairro_entrega" required placeholder="Nome do bairro" class="uppercase">
-    </div>
+                <div class="form-group">
+                    <label>Bairro <span>*</span></label>
+                    <input type="text" name="bairro_entrega" required placeholder="Nome do bairro" class="uppercase">
+                </div>
 
-    <!-- CAMPO DE COMPLEMENTO ADICIONADO (opcional) -->
-    <div class="form-group">
-        <label>Complemento</label>
-        <input type="text" name="complemento_entrega" placeholder="Apto, Bloco, Casa, etc." class="uppercase">
-    </div>
+                <!-- NOVO CAMPO DE COMPLEMENTO -->
+                <div class="form-group">
+                    <label>Complemento</label>
+                    <input type="text" name="complemento_entrega" placeholder="Apto, Bloco, Casa, etc." class="uppercase">
+                </div>
 
-    <div class="form-group">
-        <label>Cidade <span>*</span></label>
-        <input type="text" name="cidade_entrega" required placeholder="Nome da cidade" class="uppercase">
-    </div>
-    
-</div>
-            
+                <div class="form-group">
+                    <label>Cidade <span>*</span></label>
+                    <input type="text" name="cidade_entrega" required placeholder="Nome da cidade" class="uppercase">
+                </div>
+
+                <div class="form-group">
+                    <label>Link de Localização (opcional)</label>
+                    <input type="url" name="link_entrega" placeholder="https://maps.google.com/...">
+                </div>
+
+                <div class="form-group">
+                    <label>Usar o mesmo endereço para cobrança?</label>
+                    <select id="usarMesmoEndereco">
+                        <option value="sim">Não</option>
+                        <option value="nao">Sim</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Etapa 4: Endereço de Correspondência (SEM COMPLEMENTO) -->
             <div class="form-step">
                 <h2>Endereço de Correspondência</h2>
 
