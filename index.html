@@ -943,22 +943,37 @@
         }
 
         function mascaraRgIe(campo) {
-            let valor = campo.value.replace(/\D/g, '');
-            
-            // Limita a 12 caracteres
-            if (valor.length > 12) {
-                campo.value = campo.value.substring(0, 16); // 16 = tamanho máximo com máscara
-                return;
+    // Permite números e X/x (apenas no final), remove outros caracteres
+    let valor = campo.value.replace(/[^\dXx]/g, '');
+    
+    // Converte X para maiúsculo
+    valor = valor.toUpperCase();
+    
+    // Limita o tamanho (9 caracteres: 8 dígitos + X opcional)
+    if (valor.length > 9) {
+        valor = valor.substring(0, 9);
+    }
+    
+    // Aplica máscara conforme o padrão brasileiro de RG: XX.XXX.XXX-X
+    if (valor.length > 0) {
+        // Se tiver X, garante que está no final
+        if (valor.includes('X')) {
+            if (valor.indexOf('X') !== valor.length - 1) {
+                // Se X não estiver no final, remove
+                valor = valor.replace(/X/g, '');
             }
-            
-            // Aplica máscara conforme o tamanho
-            if (valor.length <= 9) {
-                valor = valor.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4');
-            } else {
-                valor = valor.replace(/(\d{3})(\d{3})(\d{3})(\d{3})/, '$1.$2.$3.$4');
-            }
-            campo.value = valor;
         }
+        
+        // Aplica a formatação
+        valor = valor.replace(/(\d{2})(\d{3})(\d{3})([\dX])?/, function(_, p1, p2, p3, p4) {
+            let formatted = p1 + '.' + p2 + '.' + p3;
+            if (p4) formatted += '-' + p4;
+            return formatted;
+        });
+    }
+    
+    campo.value = valor;
+}
 
         // Consulta CNPJ na Receita WS
         async function consultarCNPJ(cnpj) {
