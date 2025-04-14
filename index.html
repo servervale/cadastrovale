@@ -743,8 +743,11 @@
                 }
                 
                 // Preencher APENAS o campo de Razão Social
-                if (data['RAZAO SOCIAL']) {
-                    nomeRazaoInput.value = data['RAZAO SOCIAL'].toUpperCase();
+                if (data.company && data.company.name) {
+    // Remove possíveis números do início (como "44.416.409" no exemplo)
+    const razaoSocial = data.company.name.replace(/^\d+\.?\d*\s*/, '').trim();
+    nomeRazaoInput.value = razaoSocial.toUpperCase();
+}
                     document.getElementById('cpfCnpjErro').textContent = 'Razão Social preenchida automaticamente';
                     document.getElementById('cpfCnpjErro').style.color = 'var(--success-color)';
                 } else {
