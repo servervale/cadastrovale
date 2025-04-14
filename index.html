@@ -639,7 +639,7 @@
         let currentStep = 0;
 
         // =============================================
-        // ADMINISTRAÇÃO DE VENDEDORES
+        // ADMINISTRAÇÃO DE VENDEDORES (COM CORREÇÕES)
         // =============================================
         
         // Funções para abrir/fechar modais
@@ -651,10 +651,16 @@
             document.getElementById(id).style.display = 'none';
         }
         
-        // Verificar credenciais de login
+        // Verificar credenciais de login (CORRIGIDO)
         function verifyLogin() {
-            const user = document.getElementById('adminUser').value;
-            const pass = document.getElementById('adminPass').value;
+            const user = document.getElementById('adminUser').value.trim().toLowerCase();
+            const pass = document.getElementById('adminPass').value.trim().toLowerCase();
+            
+            // Validação dos campos obrigatórios
+            if (!user || !pass) {
+                alert('Por favor, preencha ambos os campos!');
+                return;
+            }
             
             if (user === 'admin' && pass === 'admin') {
                 closeModal('loginModal');
@@ -814,7 +820,7 @@
         }
 
         // =============================================
-        // FUNCIONALIDADES DO FORMULÁRIO
+        // FUNCIONALIDADES DO FORMULÁRIO (COM CORREÇÕES)
         // =============================================
 
         function updateProgress() {
@@ -889,6 +895,17 @@
                         errorDisplayed = true;
                     }
                 }
+                
+                // Validação reforçada para o vendedor
+                const vendedorSelect = document.querySelector('select[name="vendedor"]');
+                if (!vendedorSelect.value) {
+                    vendedorSelect.classList.add('invalid');
+                    allValid = false;
+                    if (!errorDisplayed) {
+                        vendedorSelect.focus();
+                        errorDisplayed = true;
+                    }
+                }
             } else if (currentStep === 1) { // Contato
                 const emailInput = document.getElementById('emailInput');
                 if (!validarEmail(emailInput.value)) {
@@ -944,7 +961,7 @@
                     msg.textContent = 'Por favor, corrija os campos destacados antes de continuar.';
                     steps[currentStep].insertBefore(msg, steps[currentStep].firstChild);
                 }
-                return;
+                return; // Impede o avanço se houver erros
             }
 
             // Pular endereço de cobrança se marcado como igual
