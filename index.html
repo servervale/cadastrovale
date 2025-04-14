@@ -4,91 +4,305 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cadastro de Clientes Walter Vale</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+      :root {
+        --primary-color: #2E7D32;
+        --primary-light: #4CAF50;
+        --primary-dark: #1B5E20;
+        --secondary-color: #FFC107;
+        --background-color: #f8f9fa;
+        --card-color: #ffffff;
+        --text-color: #333333;
+        --text-light: #666666;
+        --border-color: #e0e0e0;
+        --error-color: #d32f2f;
+        --success-color: #388E3C;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --transition: all 0.3s ease;
+      }
+      
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      
       body {
-        font-family: 'Segoe UI', sans-serif;
-        background: #f4f9f4;
+        font-family: 'Poppins', sans-serif;
+        background: var(--background-color);
+        color: var(--text-color);
+        line-height: 1.6;
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 30px;
+        min-height: 100vh;
+        padding: 30px 20px;
       }
+      
       header {
         display: flex;
         align-items: center;
         gap: 20px;
         margin-bottom: 30px;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
       }
+      
       header img {
-        height: 60px;
+        height: 70px;
+        transition: var(--transition);
       }
+      
+      header img:hover {
+        transform: scale(1.05);
+      }
+      
       header h1 {
-        color: #388e3c;
+        color: var(--primary-dark);
         font-size: 28px;
+        font-weight: 600;
         margin: 0;
+        position: relative;
       }
+      
+      header h1::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: var(--secondary-color);
+        border-radius: 3px;
+      }
+      
       .form-container {
-        background: #fff;
-        padding: 20px 30px;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        max-width: 600px;
+        background: var(--card-color);
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        max-width: 700px;
         width: 100%;
+        transition: var(--transition);
       }
+      
+      .form-container:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      }
+      
       h2 {
-        color: #388e3c;
-        margin-bottom: 20px;
+        color: var(--primary-color);
+        margin-bottom: 25px;
+        font-size: 22px;
+        font-weight: 600;
+        position: relative;
+        padding-bottom: 10px;
       }
+      
+      h2::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 2px;
+        background: var(--secondary-color);
+      }
+      
       .form-step {
         display: none;
+        animation: fadeIn 0.5s ease;
       }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
       .form-step.active {
         display: block;
       }
+      
+      .form-group {
+        margin-bottom: 20px;
+        position: relative;
+      }
+      
       label {
-        margin-top: 10px;
         display: block;
-        font-weight: bold;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text-color);
       }
+      
       label span {
-        color: red;
+        color: var(--error-color);
       }
+      
       input, select, textarea {
         width: 100%;
-        padding: 10px;
-        margin-top: 5px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        font-size: 16px;
+        padding: 12px 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 15px;
+        font-family: 'Poppins', sans-serif;
+        transition: var(--transition);
+        background-color: #fafafa;
       }
+      
+      input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: var(--primary-light);
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        background-color: #fff;
+      }
+      
       input.invalid, select.invalid, textarea.invalid {
-        border-color: red;
+        border-color: var(--error-color);
+        box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
       }
+      
       .buttons {
-        margin-top: 20px;
+        margin-top: 30px;
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
       }
+      
       button {
-        padding: 10px 20px;
-        background: #4CAF50;
-        color: white;
+        padding: 12px 25px;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 500;
         cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
       }
-      button:hover {
-        background: #45a049;
+      
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
       }
+      
+      .btn-next {
+        background: var(--primary-color);
+        color: white;
+      }
+      
+      .btn-next:hover:not(:disabled) {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+      
+      .btn-prev {
+        background: #f0f0f0;
+        color: var(--text-color);
+      }
+      
+      .btn-prev:hover {
+        background: #e0e0e0;
+      }
+      
+      .btn-submit {
+        background: var(--primary-dark);
+        color: white;
+      }
+      
+      .btn-submit:hover {
+        background: #0d4720;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      
       .error {
-        color: red;
-        font-size: 14px;
-        margin-top: 10px;
+        color: var(--error-color);
+        font-size: 13px;
+        margin-top: 5px;
+        display: block;
       }
-	  .buttons button:first-child {
-  margin-right: 20px; /* Ajuste o valor conforme necessário */
-}
-
+      
+      .error-global {
+        background: #fde8e8;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid var(--error-color);
+      }
+      
+      .progress-bar {
+        width: 100%;
+        height: 6px;
+        background: #e0e0e0;
+        border-radius: 3px;
+        margin-bottom: 30px;
+        overflow: hidden;
+      }
+      
+      .progress {
+        height: 100%;
+        background: var(--primary-color);
+        width: 0%;
+        transition: width 0.4s ease;
+      }
+      
+      .step-indicator {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 25px;
+      }
+      
+      .step-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #e0e0e0;
+        transition: var(--transition);
+      }
+      
+      .step-dot.active {
+        background: var(--primary-color);
+        transform: scale(1.2);
+      }
+      
+      textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+      
+      input.uppercase {
+        text-transform: uppercase;
+      }
+      
+      @media (max-width: 768px) {
+        header {
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        header h1 {
+          font-size: 24px;
+        }
+        
+        .form-container {
+          padding: 20px;
+        }
+        
+        .buttons {
+          flex-direction: column-reverse;
+          gap: 10px;
+        }
+        
+        button {
+          width: 100%;
+        }
+      }
     </style>
   </head>
   <body>
@@ -96,175 +310,347 @@
       <img src="https://racoesvale.com.br/wp-content/uploads/elementor/thumbs/logo-footer-qadq6kk4ypf3q0o1wx6vxv171h6r3op298gn242tqe.png" alt="Logo Walter Vale" />
       <h1>Cadastro de Clientes Walter Vale</h1>
     </header>
+    
     <div class="form-container">
+      <div class="progress-bar">
+        <div class="progress" id="progressBar"></div>
+      </div>
+      
+      <div class="step-indicator" id="stepIndicator">
+        <div class="step-dot active"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+      </div>
+      
       <form id="multiForm">
         <!-- Etapa 1: Dados do Cliente -->
         <div class="form-step active">
           <h2>Dados do Cliente</h2>
 
-          <label>Vendedor <span>*</span></label>
-          <select name="vendedor" required>
-            <option value="">Selecione</option>
-            <option>ALISSON</option>
-            <option>CLEIDE FRANCO</option>
-            <option>FABIO PEREIRA</option>
-            <option>GERSON</option>
-            <option>GUILHERME</option>
-            <option>GUSTAVO LESSE</option>
-            <option>JULIAN PADOVAN</option>
-            <option>NADIA</option>
-            <option>PEDRO PAULO</option>
-            <option>RAUL</option>
-            <option>REGINALDO DE ALMEIDA</option>
-            <option>RUDSON</option>
-            <option>TAMIRES</option>
-            <option>WALTER VALE</option>
-            <option>CONTAS A PAGAR</option>
-          </select>
+          <div class="form-group">
+            <label>Vendedor <span>*</span></label>
+            <select name="vendedor" required>
+              <option value="">Selecione um vendedor</option>
+              <option>ALISSON</option>
+              <option>CLEIDE FRANCO</option>
+              <option>FABIO PEREIRA</option>
+              <option>GERSON</option>
+              <option>GUILHERME</option>
+              <option>GUSTAVO LESSE</option>
+              <option>JULIAN PADOVAN</option>
+              <option>NADIA</option>
+              <option>PEDRO PAULO</option>
+              <option>RAUL</option>
+              <option>REGINALDO DE ALMEIDA</option>
+              <option>RUDSON</option>
+              <option>TAMIRES</option>
+              <option>WALTER VALE</option>
+              <option>CONTAS A PAGAR</option>
+            </select>
+          </div>
 
-          <label>Vendedor Compartilhado</label>
-          <input type="text" name="vendedor_compartilhado" />
+          <div class="form-group">
+            <label>Vendedor Compartilhado</label>
+            <input type="text" name="vendedor_compartilhado" placeholder="Opcional" class="uppercase" />
+          </div>
 
-          <label>CPF/CNPJ <span>*</span></label>
-          <input type="text" name="cpf_cnpj" id="cpfCnpj" required oninput="mascaraCpfCnpj(this)" />
-          <div id="cpfCnpjErro" class="error"></div>
+          <div class="form-group">
+            <label>CPF/CNPJ <span>*</span></label>
+            <input type="text" name="cpf_cnpj" id="cpfCnpj" required oninput="mascaraCpfCnpj(this)" placeholder="000.000.000-00 ou 00.000.000/0000-00" />
+            <div id="cpfCnpjErro" class="error"></div>
+          </div>
 
-          <label>Nome/Razão Social <span>*</span></label>
-          <input type="text" name="nome_razao" id="nomeRazao" required />
+          <div class="form-group">
+            <label>Nome/Razão Social <span>*</span></label>
+            <input type="text" name="nome_razao" id="nomeRazao" required placeholder="Nome completo ou razão social" class="uppercase" />
+          </div>
 
-          <label>RG / Inscrição Estadual <span>*</span></label>
-          <input type="text" name="rg_ie" oninput="mascaraRgIe(this)" required />
+          <div class="form-group">
+            <label>RG / Inscrição Estadual <span>*</span></label>
+            <input type="text" name="rg_ie" oninput="mascaraRgIe(this)" required placeholder="00.000.000-0 ou 000.000.000.000" />
+          </div>
         </div>
 
         <!-- Etapa 2: Contato -->
         <div class="form-step">
           <h2>Contato</h2>
 
-          <label>Telefone (obrigatório) <span>*</span></label>
-          <input type="text" name="telefone1" required oninput="mascaraTelefone(this)" />
+          <div class="form-group">
+            <label>Telefone (obrigatório) <span>*</span></label>
+            <input type="text" name="telefone1" required oninput="mascaraTelefone(this)" placeholder="(00) 00000-0000" />
+          </div>
 
-          <label>Telefone (opcional)</label>
-          <input type="text" name="telefone2" oninput="mascaraTelefone(this)" />
+          <div class="form-group">
+            <label>Telefone (opcional)</label>
+            <input type="text" name="telefone2" oninput="mascaraTelefone(this)" placeholder="(00) 0000-0000" />
+          </div>
 
-          <label>Email <span>*</span></label>
-          <input type="email" name="email" required />
+          <div class="form-group">
+            <label>Email <span>*</span></label>
+            <input type="email" name="email" required placeholder="seu@email.com" />
+            <div id="emailError" class="error"></div>
+          </div>
         </div>
 
         <!-- Etapa 3: Endereço de Entrega -->
         <div class="form-step">
           <h2>Endereço de Entrega</h2>
 
-          <label>CEP <span>*</span></label>
-          <input type="text" name="cep_entrega" required oninput="mascaraCep(this)" />
+          <div class="form-group">
+            <label>CEP <span>*</span></label>
+            <input type="text" name="cep_entrega" required oninput="mascaraCep(this)" placeholder="00000-000" />
+          </div>
 
-          <label>Endereço <span>*</span></label>
-          <input type="text" name="endereco_entrega" required />
+          <div class="form-group">
+            <label>Endereço <span>*</span></label>
+            <input type="text" name="endereco_entrega" required placeholder="Rua, Avenida, etc." class="uppercase" />
+          </div>
 
-          <label>Número <span>*</span></label>
-          <input type="text" name="numero_entrega" required />
+          <div class="form-group">
+            <label>Número <span>*</span></label>
+            <input type="text" name="numero_entrega" required placeholder="Número ou S/N" />
+          </div>
 
-          <label>Bairro <span>*</span></label>
-          <input type="text" name="bairro_entrega" required />
+          <div class="form-group">
+            <label>Bairro <span>*</span></label>
+            <input type="text" name="bairro_entrega" required placeholder="Nome do bairro" class="uppercase" />
+          </div>
 
-          <label>Cidade <span>*</span></label>
-          <input type="text" name="cidade_entrega" required />
+          <div class="form-group">
+            <label>Cidade <span>*</span></label>
+            <input type="text" name="cidade_entrega" required placeholder="Nome da cidade" class="uppercase" />
+          </div>
 
-          <label>Link de Localização (opcional)</label>
-          <input type="url" name="link_entrega" />
+          <div class="form-group">
+            <label>Link de Localização (opcional)</label>
+            <input type="url" name="link_entrega" placeholder="https://maps.google.com/..." />
+          </div>
 
-          <label>Usar o mesmo endereço para cobrança?</label>
-          <select id="usarMesmoEndereco">
-            <option value="sim">Não</option>
-            <option value="nao">Sim</option>
-          </select>
+          <div class="form-group">
+            <label>Usar o mesmo endereço para cobrança?</label>
+            <select id="usarMesmoEndereco">
+              <option value="sim">Não</option>
+              <option value="nao">Sim</option>
+            </select>
+          </div>
         </div>
 
         <!-- Etapa 4: Endereço de Correspondência -->
         <div class="form-step">
           <h2>Endereço de Correspondência</h2>
 
-          <label>CEP</label>
-          <input type="text" name="cep_cobranca" oninput="mascaraCep(this)" />
+          <div class="form-group">
+            <label>CEP</label>
+            <input type="text" name="cep_cobranca" oninput="mascaraCep(this)" placeholder="00000-000" />
+          </div>
 
-          <label>Endereço</label>
-          <input type="text" name="endereco_cobranca" />
+          <div class="form-group">
+            <label>Endereço</label>
+            <input type="text" name="endereco_cobranca" placeholder="Rua, Avenida, etc." class="uppercase" />
+          </div>
 
-          <label>Número</label>
-          <input type="text" name="numero_cobranca" />
+          <div class="form-group">
+            <label>Número</label>
+            <input type="text" name="numero_cobranca" placeholder="Número ou S/N" />
+          </div>
 
-          <label>Bairro</label>
-          <input type="text" name="bairro_cobranca" />
+          <div class="form-group">
+            <label>Bairro</label>
+            <input type="text" name="bairro_cobranca" placeholder="Nome do bairro" class="uppercase" />
+          </div>
 
-          <label>Cidade</label>
-          <input type="text" name="cidade_cobranca" />
+          <div class="form-group">
+            <label>Cidade</label>
+            <input type="text" name="cidade_cobranca" placeholder="Nome da cidade" class="uppercase" />
+          </div>
         </div>
 
         <!-- Etapa 5: Pagamento -->
         <div class="form-step">
           <h2>Pagamento</h2>
 
-          <label>Prazo <span>*</span></label>
-          <input type="text" name="prazo" required />
+          <div class="form-group">
+            <label>Prazo <span>*</span></label>
+            <input type="text" name="prazo" required placeholder="Condições de pagamento" class="uppercase" />
+          </div>
 
-          <label>Faturamento <span>*</span></label>
-          <select name="tipo_Fat" required>
-            <option value="">Selecione</option>
-            <option value="Recibo">Recibo</option>
-            <option value="Nota Fiscal">Nota Fiscal</option>
-          </select>
+          <div class="form-group">
+            <label>Faturamento <span>*</span></label>
+            <select name="tipo_Fat" required>
+              <option value="">Selecione o tipo de faturamento</option>
+              <option value="Recibo">Recibo</option>
+              <option value="Nota Fiscal">Nota Fiscal</option>
+            </select>
+          </div>
 
-          <label>Informações Adicionais</label>
-          <textarea name="info_adicional"></textarea>
+          <div class="form-group">
+            <label>Informações Adicionais</label>
+            <textarea name="info_adicional" placeholder="Observações importantes..." class="uppercase"></textarea>
+          </div>
         </div>
 
         <!-- Etapa 6: Resumo -->
         <div class="form-step">
           <h2>Resumo</h2>
           <p>Revise os dados antes de enviar.</p>
+          <div id="resumoDados" style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px;"></div>
         </div>
 
         <div class="buttons">
-          <button type="button" onclick="prevStep()">Voltar</button>
-          <button type="button" onclick="nextStep()">Próximo</button>
-          <button type="submit" style="display: none;">Enviar</button>
+          <button type="button" class="btn-prev" onclick="prevStep()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Voltar
+          </button>
+          <button type="button" class="btn-next" onclick="nextStep()">
+            Próximo
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button type="submit" class="btn-submit" style="display: none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Enviar Cadastro
+          </button>
         </div>
       </form>
     </div>
     <script>
       const steps = document.querySelectorAll('.form-step');
-      const nextBtn = document.querySelector("button[onclick='nextStep()']");
-      const prevBtn = document.querySelector("button[onclick='prevStep()']");
-      const submitBtn = document.querySelector("button[type='submit']");
+      const nextBtn = document.querySelector(".btn-next");
+      const prevBtn = document.querySelector(".btn-prev");
+      const submitBtn = document.querySelector(".btn-submit");
+      const progressBar = document.getElementById('progressBar');
+      const stepDots = document.querySelectorAll('.step-dot');
       let currentStep = 0;
+
+      // Função para converter para maiúsculas
+      function autoUppercase(input) {
+        // Não aplicar em email e link de localização
+        if (input.type === 'email' || input.name === 'link_entrega') return;
+        
+        // Não aplicar em campos numéricos
+        const numericFields = ['cpf_cnpj', 'rg_ie', 'telefone1', 'telefone2', 'cep_entrega', 'cep_cobranca'];
+        if (numericFields.includes(input.name)) return;
+        
+        // Guarda a posição do cursor
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        
+        // Aplica uppercase
+        input.value = input.value.toUpperCase();
+        
+        // Restaura a posição do cursor
+        input.setSelectionRange(start, end);
+      }
+
+      // Validação de email
+      function validarEmail(input) {
+        const emailError = document.getElementById('emailError');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (!emailRegex.test(input.value)) {
+          input.classList.add('invalid');
+          emailError.textContent = 'Por favor, insira um email válido (exemplo: nome@dominio.com)';
+          return false;
+        } else {
+          input.classList.remove('invalid');
+          emailError.textContent = '';
+          return true;
+        }
+      }
+
+      function updateProgress() {
+        const progress = ((currentStep + 1) / steps.length) * 100;
+        progressBar.style.width = `${progress}%`;
+        
+        stepDots.forEach((dot, index) => {
+          if (index <= currentStep) {
+            dot.classList.add('active');
+          } else {
+            dot.classList.remove('active');
+          }
+        });
+      }
 
       function showStep(index) {
         steps.forEach((step, i) => {
           step.classList.toggle('active', i === index);
         });
-        prevBtn.style.display = index === 0 ? 'none' : 'inline-block';
-        nextBtn.style.display = index === steps.length - 1 ? 'none' : 'inline-block';
-        submitBtn.style.display = index === steps.length - 1 ? 'inline-block' : 'none';
+        
+        prevBtn.style.display = index === 0 ? 'none' : 'flex';
+        nextBtn.style.display = index === steps.length - 1 ? 'none' : 'flex';
+        submitBtn.style.display = index === steps.length - 1 ? 'flex' : 'none';
+        
+        if (index === steps.length - 1) {
+          generateSummary();
+        }
+        
+        updateProgress();
+      }
+
+      function generateSummary() {
+        const formData = new FormData(document.getElementById('multiForm'));
+        let summaryHTML = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
+        
+        for (let [key, value] of formData.entries()) {
+          if (value) {
+            const label = document.querySelector(`[name="${key}"]`).previousElementSibling.textContent.replace('*', '').trim();
+            summaryHTML += `
+              <div style="margin-bottom: 10px;">
+                <strong style="color: var(--primary-color);">${label}:</strong>
+                <p style="margin-top: 2px;">${value}</p>
+              </div>
+            `;
+          }
+        }
+        
+        summaryHTML += '</div>';
+        document.getElementById('resumoDados').innerHTML = summaryHTML;
       }
 
       function nextStep() {
-        const currentInputs = steps[currentStep].querySelectorAll('input, select, textarea');
+        const currentInputs = steps[currentStep].querySelectorAll('input[required], select[required], textarea[required]');
         let allValid = true;
         let errorDisplayed = false;
 
         currentInputs.forEach(input => {
           input.classList.remove('invalid');
-          if (input.hasAttribute('required') && !input.value.trim()) {
+          if (!input.value.trim()) {
             input.classList.add('invalid');
             allValid = false;
+            
+            if (!errorDisplayed) {
+              input.focus();
+              errorDisplayed = true;
+            }
           }
         });
+
+        // Validação específica para email
+        if (currentStep === 1) {
+          const emailInput = document.querySelector('input[name="email"]');
+          if (!validarEmail(emailInput)) {
+            allValid = false;
+            if (!errorDisplayed) {
+              emailInput.focus();
+              errorDisplayed = true;
+            }
+          }
+        }
 
         if (!allValid) {
           if (!document.querySelector('.error-global')) {
             const msg = document.createElement('div');
             msg.className = 'error error-global';
-            msg.textContent = 'Preencha todos os campos obrigatórios.';
-            steps[currentStep].appendChild(msg);
+            msg.textContent = 'Por favor, preencha todos os campos obrigatórios corretamente.';
+            steps[currentStep].insertBefore(msg, steps[currentStep].firstChild);
           }
           return;
         }
@@ -272,27 +658,72 @@
         const oldMsg = document.querySelector('.error-global');
         if (oldMsg) oldMsg.remove();
 
-        // pular endereço de cobrança se marcado como igual
+        // Pular endereço de cobrança se marcado como igual
         if (currentStep === 2 && document.getElementById('usarMesmoEndereco').value === 'nao') {
           currentStep++;
         }
 
         currentStep++;
         showStep(currentStep);
+        
+        // Rolagem suave para o topo do formulário
+        window.scrollTo({
+          top: document.querySelector('.form-container').offsetTop - 20,
+          behavior: 'smooth'
+        });
       }
 
       function prevStep() {
         const oldMsg = document.querySelector('.error-global');
         if (oldMsg) oldMsg.remove();
 
-        currentStep--;
+        // Lógica para pular etapa de endereço se necessário
+        if (currentStep === 4 && document.getElementById('usarMesmoEndereco').value === 'nao') {
+          currentStep -= 2; // Volta duas etapas (de pagamento direto para entrega)
+        } else {
+          currentStep--;
+        }
+        
         showStep(currentStep);
+        window.scrollTo({
+          top: document.querySelector('.form-container').offsetTop - 20,
+          behavior: 'smooth'
+        });
       }
 
       showStep(currentStep);
 
+      // Adicionar event listeners quando o DOM carregar
+      document.addEventListener('DOMContentLoaded', function() {
+        // Para auto uppercase
+        document.querySelectorAll('input[type="text"], textarea').forEach(input => {
+          input.addEventListener('input', function() {
+            autoUppercase(this);
+          });
+        });
+
+        // Para validação de email em tempo real
+        const emailInput = document.querySelector('input[name="email"]');
+        emailInput.addEventListener('input', function() {
+          validarEmail(this);
+        });
+      });
+
       document.getElementById('multiForm').addEventListener('submit', function(e) {
         e.preventDefault();
+        
+        // Mostrar loading no botão
+        submitBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="animation: rotate 1s linear infinite;">
+            <style>
+              @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+            </style>
+            <path d="M12 2a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1zm8.66-10a1 1 0 0 1-.366 1.366l-2.598 1.5a1 1 0 1 1-1-1.732l2.598-1.5A1 1 0 0 1 20.66 7zM7.67 14.5a1 1 0 0 1-.366 1.366l-2.598 1.5a1 1 0 1 1-1-1.732l2.598-1.5a1 1 0 0 1 1.366.366zM20.66 17a1 1 0 0 1-1.366.366l-2.598-1.5a1 1 0 1 1 1-1.732l2.598 1.5A1 1 0 0 1 20.66 17zM7.67 9.5a1 1 0 0 1-1.366.366l-2.598-1.5a1 1 0 1 1 1-1.732l2.598 1.5A1 1 0 0 1 7.67 9.5z" fill="currentColor"/>
+          </svg>
+          Enviando...
+        `;
+        submitBtn.disabled = true;
+        
         const dados = new FormData(this);
         fetch('https://script.google.com/macros/s/AKfycbxdpNAo96Pn1bnhex-UCLG8rRHQBnmigbP7yDnJUAP_FSVpzzu-uyNmtrSo3kid92_H_w/exec', {
           method: 'POST',
@@ -300,15 +731,36 @@
         })
         .then(response => response.text())
         .then(data => {
-          alert('Formulário enviado com sucesso!');
-          window.location.reload();
+          // Mostrar mensagem de sucesso
+          const successMsg = `
+            <div style="text-align: center; padding: 20px;">
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 15px;">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="var(--success-color)" stroke-width="2" stroke-linecap="round"/>
+                <path d="M22 4L12 14.01l-3-3" stroke="var(--success-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <h3 style="color: var(--success-color); margin-bottom: 10px;">Cadastro realizado com sucesso!</h3>
+              <p>Obrigado por cadastrar seu cliente na Walter Vale.</p>
+              <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 20px; background: var(--primary-color); color: white; border: none; border-radius: 6px; cursor: pointer;">
+                Novo Cadastro
+              </button>
+            </div>
+          `;
+          document.querySelector('.form-container').innerHTML = successMsg;
         })
         .catch(error => {
-          alert('Erro ao enviar formulário.');
+          alert('Erro ao enviar formulário. Por favor, tente novamente.');
           console.error(error);
+          submitBtn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Enviar Cadastro
+          `;
+          submitBtn.disabled = false;
         });
       });
 
+      // Funções de máscara
       function mascaraCpfCnpj(campo) {
         const valor = campo.value.replace(/\D/g, '');
         if (valor.length <= 11) {
@@ -325,7 +777,13 @@
 
       function mascaraTelefone(campo) {
         const valor = campo.value.replace(/\D/g, '');
-        campo.value = valor.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        if (valor.length === 11) {
+          campo.value = valor.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        } else if (valor.length === 10) {
+          campo.value = valor.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+        } else {
+          campo.value = valor;
+        }
       }
 
       function mascaraCep(campo) {
