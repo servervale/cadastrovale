@@ -943,58 +943,56 @@
         }
 
         function mascaraRgIe(campo) {
-    // Remove todos os caracteres não numéricos nem X/x
+    // Guarda a posição do cursor
+    const start = campo.selectionStart;
+    const end = campo.selectionEnd;
+    
+    // Remove todos os caracteres não numéricos nem X/x, mantendo apenas um X no final se for o caso
     let valor = campo.value.replace(/[^\dXx]/g, '');
     
-    // Converte X para maiúsculo
+    // Converte X para maiúsculo e garante que há no máximo um X, apenas no final
     valor = valor.toUpperCase();
+    const hasX = valor.includes('X');
     
-    // Verifica se parece ser uma IE-SP (começa com P ou 0-9 e tem 12 dígitos)
-    const isIESP = /^[P\d]/.test(valor) && (valor.length >= 12 || valor.includes('P'));
+    if (hasX) {
+        // Remove todos os X e adiciona apenas um no final
+        valor = valor.replace(/X/g, '') + 'X';
+    }
+    
+    // Verifica se parece ser uma IE-SP (12 dígitos ou começa com P)
+    const isIESP = valor.length >= 12 || valor.startsWith('P');
     
     // Limita o tamanho conforme o tipo
-    if (isIESP && valor.length > 12) {
-        valor = valor.substring(0, 12); // IE-SP tem 12 dígitos
-    } else if (!isIESP && valor.length > 9) {
-        valor = valor.substring(0, 9); // RG tem até 9 caracteres (8 dígitos + X opcional)
+    if (isIESP) {
+        valor = valor.substring(0, 12); // IE-SP tem no máximo 12 caracteres
+    } else {
+        valor = valor.substring(0, 9); // RG tem no máximo 9 caracteres (8 dígitos + X)
     }
     
     // Aplica máscara conforme o tipo
     if (valor.length > 0) {
         if (isIESP) {
-            // Máscara para IE-SP: 000.000.000.000
-            valor = valor.replace(/^(\d{3})(\d{3})(\d{3})(\d{3})$/, '$1.$2.$3.$4');
-            
-            // Se começar com P (como em alguns casos de IE-SP)
+            // Máscara para IE-SP: 000.000.000.000 ou P-000.000.000.000
             if (valor.startsWith('P')) {
-                valor = valor.replace(/^P(\d{3})(\d{3})(\d{3})(\d{2})$/, 'P$1.$2.$3.$4');
+                valor = valor.replace(/^P(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})$/, function(_, p1, p2, p3, p4) {
+                    return 'P' + (p1 ? p1 + (p2 ? '.' + p2 + (p3 ? '.' + p3 + (p4 ? '.' + p4 : '') : '') : '');
+                });
+            } else {
+                valor = valor.replace(/^(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,3})$/, function(_, p1, p2, p3, p4) {
+                    return (p1 || '') + (p2 ? '.' + p2 : '') + (p3 ? '.' + p3 : '') + (p4 ? '.' + p4 : '');
+                });
             }
         } else {
             // Máscara para RG: XX.XXX.XXX-X (com X opcional no final)
-            if (valor.includes('X') && valor.indexOf('X') !== valor.length - 1) {
-                valor = valor.replace(/X/g, '');
-            }
-            
-            valor = valor.replace(/^(\d{2})(\d{3})(\d{3})([\dX])?$/, function(_, p1, p2, p3, p4) {
-                let formatted = p1 + '.' + p2 + '.' + p3;
-                if (p4) formatted += '-' + p4;
-                return formatted;
+            valor = valor.replace(/^(\d{0,2})(\d{0,3})(\d{0,3})([\dX]{0,1})$/, function(_, p1, p2, p3, p4) {
+                return (p1 || '') + (p2 ? '.' + p2 : '') + (p3 ? '.' + p3 : '') + (p4 ? '-' + p4 : '');
             });
         }
     }
     
+    // Atualiza o valor do campo mantendo a posição do cursor
     campo.value = valor;
-}
-        
-        // Aplica a formatação
-        valor = valor.replace(/(\d{2})(\d{3})(\d{3})([\dX])?/, function(_, p1, p2, p3, p4) {
-            let formatted = p1 + '.' + p2 + '.' + p3;
-            if (p4) formatted += '-' + p4;
-            return formatted;
-        });
-    }
-    
-    campo.value = valor;
+    campo.setSelectionRange(start, end);
 }
 
         // Consulta CNPJ na Receita WS
