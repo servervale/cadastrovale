@@ -294,6 +294,40 @@
             margin-bottom: 20px;
             color: var(--success-color);
         }
+
+        /* Novos estilos para a consulta de CNPJ */
+        .cnpj-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .cnpj-container input {
+            flex: 1;
+        }
+        
+        .btn-consultar {
+            background: var(--secondary-color);
+            color: #000;
+            padding: 0 15px;
+            white-space: nowrap;
+        }
+        
+        .btn-consultar:hover {
+            background: #ffb300;
+        }
+        
+        .btn-consultar:disabled {
+            background: #e0e0e0;
+        }
+        
+        .loading {
+            animation: rotate 1s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
         
         @media (max-width: 768px) {
             header {
@@ -316,6 +350,10 @@
             
             button {
                 width: 100%;
+            }
+            
+            .cnpj-container {
+                flex-direction: column;
             }
         }
     </style>
@@ -374,7 +412,15 @@
 
                 <div class="form-group">
                     <label>CPF/CNPJ <span>*</span></label>
-                    <input type="text" name="cpf_cnpj" id="cpfCnpj" required placeholder="000.000.000-00 ou 00.000.000/0000-00" maxlength="18">
+                    <div class="cnpj-container">
+                        <input type="text" name="cpf_cnpj" id="cpfCnpj" required placeholder="000.000.000-00 ou 00.000.000/0000-00" maxlength="18">
+                        <button type="button" id="btnConsultarCNPJ" class="btn-consultar" disabled>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Consultar
+                        </button>
+                    </div>
                     <div id="cpfCnpjErro" class="error"></div>
                 </div>
 
@@ -651,6 +697,80 @@
             
             return { valido: true };
         }
+
+        // =============================================
+        // CONSULTA CNPJ NA RECEITA WS (ATUALIZADA)
+        // =============================================
+
+        async function consultarCNPJ(cnpj) {
+    const btnConsultar = document.getElementById('btnConsultarCNPJ');
+    const cpfCnpjInput = document.getElementById('cpfCnpj');
+    const nomeRazaoInput = document.getElementById('nomeRazao');
+    
+    try {
+        // Mostrar loading
+        btnConsultar.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="loading">
+                <path d="M12 2a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1zm8.66-10a1 1 0 0 1-.366 1.366l-2.598 1.5a1 1 0 1 1-1-1.732l2.598-1.5A1 1 0 0 1 20.66 7zM7.67 14.5a1 1 0 0 1-.366 1.366l-2.598 1.5a1 1 0 1 1-1-1.732l2.598-1.5a1 1 0 0 1 1.366.366zM20.66 17a1 1 0 0 1-1.366.366l-2.598-1.5a1 1 0 1 1 1-1.732l2.598 1.5A1 1 0 0 1 20.66 17zM7.67 9.5a1 1 0 0 1-1.366.366l-2.598-1.5a1 1 0 1 1 1-1.732l2.598 1.5A1 1 0 0 1 7.67 9.5z" fill="currentColor"/>
+            </svg>
+            Consultando...
+        `;
+        btnConsultar.disabled = true;
+        cpfCnpjInput.disabled = true;
+        
+        // Limpar erros anteriores
+        cpfCnpjInput.classList.remove('invalid');
+        document.getElementById('cpfCnpjErro').textContent = '';
+        
+        const cnpjNumeros = cnpj.replace(/\D/g, '');
+        
+        // Verificar se é um CNPJ válido antes de consultar
+        if (cnpjNumeros.length !== 14) {
+            throw new Error('CNPJ deve ter 14 dígitos');
+        }
+        
+        // Fazer a consulta na API com o token de autorização
+        const response = await fetch(`https://receitaws.com.br/v1/cnpj/${cnpjNumeros}`, {
+            headers: {
+                'Authorization': 'Bearer 468159dac6a68cc5d4c634ec8fd5a9a3843033f20dfa5f557aaf3d90c6a32dcf'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erro na consulta à Receita WS');
+        }
+        
+        const data = await response.json();
+        
+        if (data.status === 'ERROR') {
+            throw new Error(data.message || 'Erro na consulta do CNPJ');
+        }
+        
+        // Preencher os campos com os dados retornados
+        if (data.nome) {
+            nomeRazaoInput.value = data.nome.toUpperCase();
+        }
+        
+        // Mostrar mensagem de sucesso
+        document.getElementById('cpfCnpjErro').textContent = 'CNPJ consultado com sucesso!';
+        document.getElementById('cpfCnpjErro').style.color = 'var(--success-color)';
+        
+    } catch (error) {
+        console.error('Erro ao consultar CNPJ:', error);
+        document.getElementById('cpfCnpjErro').textContent = error.message || 'Erro ao consultar CNPJ';
+        cpfCnpjInput.classList.add('invalid');
+    } finally {
+        // Restaurar botão
+        btnConsultar.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Consultar
+        `;
+        btnConsultar.disabled = false;
+        cpfCnpjInput.disabled = false;
+    }
+}
 
         // =============================================
         // FUNCIONALIDADES DO FORMULÁRIO
@@ -952,6 +1072,10 @@
                     document.getElementById('cpfCnpjErro').textContent = '';
                 }
             }
+            
+            // Atualiza estado do botão de consulta
+            const btnConsultar = document.getElementById('btnConsultarCNPJ');
+            btnConsultar.disabled = valor.length !== 14;
         }
 
         function mascaraRgIe(campo) {
@@ -970,20 +1094,6 @@
                 valor = valor.replace(/(\d{3})(\d{3})(\d{3})(\d{3})/, '$1.$2.$3.$4');
             }
             campo.value = valor;
-        }
-
-        // Consulta CNPJ na Receita WS
-        async function consultarCNPJ(cnpj) {
-            try {
-                const response = await fetch(`https://receitaws.com.br/v1/cnpj/${cnpj.replace(/\D/g, '')}`);
-                const data = await response.json();
-                
-                if (data.nome) {
-                    document.getElementById('nomeRazao').value = data.nome.toUpperCase();
-                }
-            } catch (error) {
-                console.error('Erro ao consultar CNPJ:', error);
-            }
         }
 
         // =============================================
@@ -1010,6 +1120,17 @@
                     this.classList.add('invalid');
                     document.getElementById('cpfCnpjErro').textContent = 
                         valor.length < 11 ? 'CPF deve ter 11 dígitos' : 'CNPJ deve ter 14 dígitos';
+                }
+            });
+
+            // Configura botão de consulta CNPJ
+            document.getElementById('btnConsultarCNPJ').addEventListener('click', function() {
+                const cnpj = document.getElementById('cpfCnpj').value;
+                if (cnpj.replace(/\D/g, '').length === 14) {
+                    consultarCNPJ(cnpj);
+                } else {
+                    document.getElementById('cpfCnpjErro').textContent = 'Informe um CNPJ válido para consultar';
+                    document.getElementById('cpfCnpj').classList.add('invalid');
                 }
             });
 
