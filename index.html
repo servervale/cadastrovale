@@ -82,24 +82,6 @@
             border-radius: 3px;
         }
         
-        .admin-gear {
-            position: absolute;
-            top: 0;
-            right: 0;
-            cursor: pointer;
-            padding: 10px;
-            color: var(--text-light);
-            transition: var(--transition);
-            background: none;
-            border: none;
-            font-size: 20px;
-        }
-        
-        .admin-gear:hover {
-            color: var(--primary-color);
-            transform: rotate(90deg);
-        }
-        
         .form-container {
             background: var(--card-color);
             padding: 30px;
@@ -313,65 +295,6 @@
             color: var(--success-color);
         }
         
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: var(--shadow);
-        }
-        
-        .modal h3 {
-            margin-bottom: 20px;
-            color: var(--primary-color);
-        }
-        
-        .modal-input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-        }
-        
-        .modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .vendedor-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .vendedor-item button {
-            background: var(--error-color);
-            color: white;
-            border: none;
-            padding: 2px 8px;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        
         @media (max-width: 768px) {
             header {
                 flex-direction: column;
@@ -401,33 +324,7 @@
     <header>
         <img src="https://racoesvale.com.br/wp-content/uploads/elementor/thumbs/logo-footer-qadq6kk4ypf3q0o1wx6vxv171h6r3op298gn242tqe.png" alt="Logo Walter Vale">
         <h1>Cadastro de Clientes Walter Vale</h1>
-        <button class="admin-gear" onclick="openAdminModal()">⚙️</button>
     </header>
-    
-    <!-- Modais para administração -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <h3>Login Administrativo</h3>
-            <input type="text" id="adminUser" class="modal-input" placeholder="Usuário">
-            <input type="password" id="adminPass" class="modal-input" placeholder="Senha">
-            <div class="modal-buttons">
-                <button onclick="closeModal('loginModal')">Cancelar</button>
-                <button onclick="verifyLogin()">Entrar</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="vendedoresModal" class="modal">
-        <div class="modal-content">
-            <h3>Gerenciar Vendedores</h3>
-            <div id="vendedoresList"></div>
-            <input type="text" id="novoVendedor" class="modal-input" placeholder="Nome do novo vendedor">
-            <div class="modal-buttons">
-                <button onclick="closeModal('vendedoresModal')">Fechar</button>
-                <button onclick="adicionarVendedor()">Adicionar</button>
-            </div>
-        </div>
-    </div>
     
     <div class="form-container">
         <div class="progress-bar">
@@ -452,7 +349,21 @@
                     <label>Vendedor <span>*</span></label>
                     <select name="vendedor" required>
                         <option value="">Selecione um vendedor</option>
-                        <!-- Os vendedores serão carregados via JavaScript -->
+                        <option>ALISSON</option>
+                        <option>CLEIDE FRANCO</option>
+                        <option>FABIO PEREIRA</option>
+                        <option>GERSON</option>
+                        <option>GUILHERME</option>
+                        <option>GUSTAVO LESSE</option>
+                        <option>JULIAN PADOVAN</option>
+                        <option>NADIA</option>
+                        <option>PEDRO PAULO</option>
+                        <option>RAUL</option>
+                        <option>REGINALDO DE ALMEIDA</option>
+                        <option>RUDSON</option>
+                        <option>TAMIRES</option>
+                        <option>WALTER VALE</option>
+                        <option>CONTAS A PAGAR</option>
                     </select>
                 </div>
 
@@ -639,91 +550,7 @@
         let currentStep = 0;
 
         // =============================================
-        // ADMINISTRAÇÃO DE VENDEDORES (COM CORREÇÕES)
-        // =============================================
-        
-        // Funções para abrir/fechar modais
-        function openAdminModal() {
-            document.getElementById('loginModal').style.display = 'flex';
-        }
-        
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
-        
-        // Verificar credenciais de login (CORRIGIDO)
-        function verifyLogin() {
-            const user = document.getElementById('adminUser').value.trim().toLowerCase();
-            const pass = document.getElementById('adminPass').value.trim().toLowerCase();
-            
-            // Validação dos campos obrigatórios
-            if (!user || !pass) {
-                alert('Por favor, preencha ambos os campos!');
-                return;
-            }
-            
-            if (user === 'admin' && pass === 'admin') {
-                closeModal('loginModal');
-                loadVendedores();
-                document.getElementById('vendedoresModal').style.display = 'flex';
-            } else {
-                alert('Credenciais incorretas!');
-            }
-        }
-        
-        // Carregar lista de vendedores do localStorage ou padrão
-        function loadVendedores() {
-            let vendedores = JSON.parse(localStorage.getItem('vendedores')) || [
-                'ALISSON', 'CLEIDE FRANCO', 'FABIO PEREIRA', 'GERSON', 
-                'GUILHERME', 'GUSTAVO LESSE', 'JULIAN PADOVAN', 'NADIA',
-                'PEDRO PAULO', 'RAUL', 'REGINALDO DE ALMEIDA', 'RUDSON',
-                'TAMIRES', 'WALTER VALE', 'CONTAS A PAGAR'
-            ];
-            
-            const listaHtml = vendedores.map(vendedor => `
-                <div class="vendedor-item">
-                    <span>${vendedor}</span>
-                    <button onclick="removerVendedor('${vendedor}')">Remover</button>
-                </div>
-            `).join('');
-            
-            document.getElementById('vendedoresList').innerHTML = listaHtml;
-            atualizarDropdownVendedores(vendedores);
-        }
-        
-        // Adicionar novo vendedor
-        function adicionarVendedor() {
-            const novo = document.getElementById('novoVendedor').value.trim();
-            if (!novo) return;
-            
-            let vendedores = JSON.parse(localStorage.getItem('vendedores')) || [];
-            if (!vendedores.includes(novo.toUpperCase())) {
-                vendedores.push(novo.toUpperCase());
-                localStorage.setItem('vendedores', JSON.stringify(vendedores));
-                loadVendedores();
-                document.getElementById('novoVendedor').value = '';
-            } else {
-                alert('Este vendedor já está na lista!');
-            }
-        }
-        
-        // Remover vendedor
-        function removerVendedor(nome) {
-            let vendedores = JSON.parse(localStorage.getItem('vendedores')) || [];
-            vendedores = vendedores.filter(v => v !== nome);
-            localStorage.setItem('vendedores', JSON.stringify(vendedores));
-            loadVendedores();
-        }
-        
-        // Atualizar dropdown no formulário
-        function atualizarDropdownVendedores(vendedores) {
-            const select = document.querySelector('select[name="vendedor"]');
-            select.innerHTML = '<option value="">Selecione um vendedor</option>' + 
-                vendedores.map(v => `<option>${v}</option>`).join('');
-        }
-
-        // =============================================
-        // VALIDAÇÃO DE CPF/CNPJ
+        // VALIDAÇÃO DE CPF/CNPJ (ROBUSTA)
         // =============================================
         
         function validarCPF(cpf) { 
@@ -820,7 +647,7 @@
         }
 
         // =============================================
-        // FUNCIONALIDADES DO FORMULÁRIO (COM CORREÇÕES)
+        // FUNCIONALIDADES DO FORMULÁRIO
         // =============================================
 
         function updateProgress() {
@@ -1050,6 +877,12 @@
                                  .replace(/(\d{3})(\d)/, '$1.$2')
                                  .replace(/(\d{3})(\d{4})(\d)/, '$1/$2-$3');
             }
+            
+            // Limpa mensagem de erro enquanto digita
+            if (document.getElementById('cpfCnpjErro').textContent && valor.length < (valor.length <= 11 ? 11 : 14)) {
+                document.getElementById('cpfCnpjErro').textContent = '';
+                campo.classList.remove('invalid');
+            }
         }
 
         function mascaraTelefone(campo) {
@@ -1061,11 +894,23 @@
             } else {
                 campo.value = valor;
             }
+            
+            // Limpa mensagem de erro enquanto digita
+            if (document.getElementById('telefoneError').textContent && valor.length < 10) {
+                document.getElementById('telefoneError').textContent = '';
+                campo.classList.remove('invalid');
+            }
         }
 
         function mascaraCep(campo) {
             const valor = campo.value.replace(/\D/g, '');
             campo.value = valor.replace(/(\d{5})(\d{3})/, '$1-$2');
+            
+            // Limpa mensagem de erro enquanto digita
+            if (document.getElementById('cepError').textContent && valor.length < 8) {
+                document.getElementById('cepError').textContent = '';
+                campo.classList.remove('invalid');
+            }
         }
 
         function mascaraRgIe(campo) {
@@ -1078,14 +923,25 @@
             campo.value = valor;
         }
 
+        // Consulta CNPJ na Receita WS
+        async function consultarCNPJ(cnpj) {
+            try {
+                const response = await fetch(`https://receitaws.com.br/v1/cnpj/${cnpj.replace(/\D/g, '')}`);
+                const data = await response.json();
+                
+                if (data.nome) {
+                    document.getElementById('nomeRazao').value = data.nome.toUpperCase();
+                }
+            } catch (error) {
+                console.error('Erro ao consultar CNPJ:', error);
+            }
+        }
+
         // =============================================
         // INICIALIZAÇÃO
         // =============================================
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Carrega vendedores
-            loadVendedores();
-            
             // Configura auto uppercase
             document.querySelectorAll('input[type="text"], textarea').forEach(input => {
                 input.addEventListener('input', function() {
@@ -1093,9 +949,18 @@
                 });
             });
 
-            // Validação em tempo real
+            // Consulta CNPJ quando completo (14 dígitos)
+            const cpfCnpjInput = document.getElementById('cpfCnpj');
+            cpfCnpjInput.addEventListener('blur', function() {
+                const valor = this.value.replace(/\D/g, '');
+                if (valor.length === 14) {
+                    consultarCNPJ(this.value);
+                }
+            });
+
+            // Validação de email apenas ao sair do campo
             const emailInput = document.getElementById('emailInput');
-            emailInput.addEventListener('input', function() {
+            emailInput.addEventListener('blur', function() {
                 if (!validarEmail(this.value)) {
                     this.classList.add('invalid');
                     document.getElementById('emailError').textContent = 'Por favor, insira um email válido';
@@ -1105,8 +970,9 @@
                 }
             });
 
+            // Validação de telefone apenas ao sair do campo
             const telefoneInput = document.getElementById('telefone1');
-            telefoneInput.addEventListener('input', function() {
+            telefoneInput.addEventListener('blur', function() {
                 if (!validarTelefone(this.value)) {
                     this.classList.add('invalid');
                     document.getElementById('telefoneError').textContent = 'Telefone deve ter 10 ou 11 dígitos';
@@ -1116,8 +982,9 @@
                 }
             });
 
+            // Validação de CEP apenas ao sair do campo
             const cepInput = document.getElementById('cepEntrega');
-            cepInput.addEventListener('input', function() {
+            cepInput.addEventListener('blur', function() {
                 if (!validarCEP(this.value.replace(/\D/g, ''))) {
                     this.classList.add('invalid');
                     document.getElementById('cepError').textContent = 'CEP deve ter 8 dígitos';
