@@ -745,7 +745,7 @@
                 
                 // Preencher APENAS o campo de Razão Social
                 if (data.company.name) {
-                    nomeRazaoInput.value = data.name.toUpperCase();
+                    nomeRazaoInput.value = data.company.name.toUpperCase();
                     document.getElementById('cpfCnpjErro').textContent = 'Razão Social preenchida automaticamente';
                     document.getElementById('cpfCnpjErro').style.color = 'var(--success-color)';
                 } else {
