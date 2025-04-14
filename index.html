@@ -1017,7 +1017,19 @@
             const rgIeInput = document.getElementById('rgIe');
             rgIeInput.addEventListener('input', function() {
                 mascaraRgIe(this);
-            });
+            const rgIeValue = rgIeInput.value.replace(/[^\dX]/g, ''); // Mantém números e X
+                
+                if (!/^\d{8}[\dX]?$/.test(rgIeValue)) {
+                    rgIeInput.classList.add('invalid');
+                    document.getElementById('rgIeError').textContent = 'RG deve ter 8 dígitos + X opcional no final (Ex: 12.345.678-X)';
+                    allValid = false;
+                    if (!errorDisplayed) {
+                        rgIeInput.focus();
+                        errorDisplayed = true;
+                    }
+                }
+            
+        });
             
             rgIeInput.addEventListener('blur', function() {
                 const valor = this.value.replace(/\D/g, '');
