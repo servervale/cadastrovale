@@ -696,7 +696,7 @@
     const cpfCnpjErroElement = document.getElementById('cpfCnpjErro');
     
     try {
-        // Mostrar loading (código anterior permanece igual)
+        // Mostrar loading
         btnConsultar.innerHTML = `
             <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="loading">
                 <path d="M12 2a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1zm8.66-10a1 1 0 0 1-.366 1.366l-2.598 1.5a1 1 0 1 1-1-1.732l2.598-1.5A1 1 0 0 1 20.66 7zM7.67 14.5a1 1 0 0 1-.366 1.366l-2.598 1.5a1 1 0 1 1-1-1.732l2.598-1.5a1 1 0 0 1 1.366.366zM20.66 17a1 1 0 0 1-1.366.366l-2.598-1.5a1 1 0 1 1 1-1.732l2.598 1.5A1 1 0 0 1 20.66 17zM7.67 9.5a1 1 0 0 1-1.366.366l-2.598-1.5a1 1 0 1 1 1-1.732l2.598 1.5A1 1 0 0 1 7.67 9.5z" fill="currentColor"/>
@@ -730,7 +730,7 @@
         }
         
         const data = await response.json();
-        console.log('Dados retornados pela API:', data); // Adicione esta linha para debug
+        console.log('Dados retornados pela API:', data);
         let mensagensSucesso = [];
         
         // Preencher Razão Social se disponível
@@ -740,13 +740,13 @@
         }
         
         // CORREÇÃO: Preencher Inscrição Estadual - Versão mais robusta
-        if (data.inscrições && Array.isArray(data.inscrições)) {
+        if (data.registrations && Array.isArray(data.registrations)) {
             // Tenta encontrar a IE Normal primeiro
-            let ie = data.inscrições.find(i => i.tipo?.texto === 'IE Normal');
+            let ie = data.registrations.find(i => i.type?.text === 'IE Normal');
             
             // Se não encontrar, pega a primeira inscrição disponível
-            if (!ie && data.inscrições.length > 0) {
-                ie = data.inscrições[0];
+            if (!ie && data.registrations.length > 0) {
+                ie = data.registrations[0];
             }
             
             if (ie?.number) {
@@ -754,7 +754,7 @@
                 let ieNumeros = ie.number.replace(/\D/g, '');
                 
                 // Formatar apenas se for de SP (12 dígitos)
-                if (ie.estado === 'SP' && ieNumeros.length === 12) {
+                if (ie.state === 'SP' && ieNumeros.length === 12) {
                     rgIeInput.value = ieNumeros.replace(/(\d{3})(\d{3})(\d{3})(\d{3})/, '$1.$2.$3.$4');
                 } else {
                     rgIeInput.value = ie.number; // Mantém o formato original
@@ -778,7 +778,7 @@
         cpfCnpjErroElement.style.color = 'var(--error-color)';
         cpfCnpjInput.classList.add('invalid');
     } finally {
-        // Restaurar botão (código anterior permanece igual)
+        // Restaurar botão
         btnConsultar.innerHTML = `
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
