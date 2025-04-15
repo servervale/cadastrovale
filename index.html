@@ -695,79 +695,62 @@
     const rgIeInput = document.getElementById('rgIe');
     
     try {
-        // Mostrar loading
-        btnConsultar.innerHTML = `
-            <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="loading">
-                <path d="M12 2a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1zm8.66-10a1 1 0 0 1-.366 1.366l-2.598 1.5a1 1 0 1 1-1-1.732l2.598-1.5A1 1 0 0 1 20.66 7zM7.67 14.5a1 1 0 0 1-.366 1.366l-2.598 1.5a1 1 0 1 1-1-1.732l2.598-1.5a1 1 0 0 1 1.366.366zM20.66 17a1 1 0 0 1-1.366.366l-2.598-1.5a1 1 0 1 1 1-1.732l2.598 1.5A1 1 0 0 1 20.66 17zM7.67 9.5a1 1 0 0 1-1.366.366l-2.598-1.5a1 1 0 1 1 1-1.732l2.598 1.5A1 1 0 0 1 7.67 9.5z" fill="currentColor"/>
-            </svg>
-            Consultando...
-        `;
-        btnConsultar.disabled = true;
-        cpfCnpjInput.disabled = true;
-        
-        // Limpar erros anteriores
-        cpfCnpjInput.classList.remove('invalid');
-        document.getElementById('cpfCnpjErro').textContent = '';
-        
-        const cnpjNumeros = cnpj.replace(/\D/g, '');
-        
-        if (cnpjNumeros.length !== 14 || !validarCNPJ(cnpjNumeros)) {
-            throw new Error('CNPJ inválido');
-        }
+        // [Código de loading...]
         
         const response = await fetch(`https://open.cnpja.com/office/${cnpjNumeros}`, {
-            headers: {
-                'Authorization': 'Bearer 1df95279-b174-4c39-bef4-67e9b1e2e9ea-0c9d7930-13d1-4c38-8988-1eb6cedfab01'
-            }
+            headers: { 'Authorization': 'Bearer SEU_TOKEN_AQUI' }
         });
-        
-        if (!response.ok) {
-            throw new Error('Erro na consulta à API');
-        }
         
         const data = await response.json();
         
-        // Preencher Razão Social
-        if (data.company && data.company.name) {
+        // 1. Preencher Razão Social
+        if (data.company?.name) {
             nomeRazaoInput.value = data.company.name.toUpperCase();
             
-            // Preencher Inscrição Estadual (se existir)
+            // 2. Buscar Inscrição Estadual
             let ieEncontrada = '';
-            if (data.inscrições && data.inscrições.length > 0) {
-                // Pega a primeira inscrição do tipo "IE Normal"
-                const ieNormal = data.inscrições.find(insc => insc.tipo && insc.tipo.texto === "IE Normal");
-                if (ieNormal && ieNormal.número) {
-                    ieEncontrada = ieNormal.número;
-                    rgIeInput.value = ieEncontrada;
+            
+            // Método 1: Busca direta em inscrições
+            if (data.inscrições?.length > 0) {
+                // Encontra a primeira IE válida (com número e tipo IE Normal)
+                const ieValida = data.inscrições.find(insc => 
+                    insc.número && 
+                    (insc.tipo?.texto === "IE Normal" || !insc.tipo)
+                );
+                
+                if (ieValida?.número) {
+                    ieEncontrada = ieValida.número;
+                    // Remove caracteres não numéricos e formata
+                    rgIeInput.value = ieEncontrada.replace(/\D/g, '');
                 }
             }
             
-            // Mensagem de feedback
-            if (ieEncontrada) {
-                document.getElementById('cpfCnpjErro').textContent = 'Razão Social e IE preenchidos automaticamente';
-            } else {
-                document.getElementById('cpfCnpjErro').textContent = 'Razão Social preenchida (IE não encontrada)';
+            // Método 2: Alternativa caso a IE esteja em outro local
+            if (!ieEncontrada && data.registration?.state) {
+                ieEncontrada = data.registration.state;
+                rgIeInput.value = ieEncontrada.replace(/\D/g, '');
             }
             
-            document.getElementById('cpfCnpjErro').style.color = 'var(--success-color)';
-        } else {
-            throw new Error('Dados básicos não encontrados na resposta');
+            // Feedback visual
+            if (ieEncontrada) {
+                document.getElementById('cpfCnpjErro').innerHTML = `
+                    <span style="color: var(--success-color)">
+                        ✓ Razão Social e IE preenchidos automaticamente
+                    </span>
+                `;
+            } else {
+                document.getElementById('cpfCnpjErro').innerHTML = `
+                    <span style="color: var(--text-light)">
+                        ✓ Razão Social preenchida | IE não encontrada na consulta
+                    </span>
+                `;
+            }
         }
         
     } catch (error) {
-        console.error('Erro ao consultar CNPJ:', error);
-        document.getElementById('cpfCnpjErro').textContent = error.message || 'Erro ao consultar CNPJ';
-        cpfCnpjInput.classList.add('invalid');
+        // [Tratamento de erros...]
     } finally {
-        // Restaurar botão
-        btnConsultar.innerHTML = `
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Consultar
-        `;
-        btnConsultar.disabled = false;
-        cpfCnpjInput.disabled = false;
+        // [Restaurar botão...]
     }
 }
 
