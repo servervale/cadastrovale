@@ -411,7 +411,7 @@
                 <div class="form-group">
                     <label>CPF/CNPJ <span>*</span></label>
                     <div class="cnpj-container">
-                        <input type="text" name="cpf_cnpj" id="cpfCnpj" required placeholder="000.000.000-00 ou 00.000.000/0000-00" maxlength="18">
+                        <input type="text" name="cpf_cnpj" id="cpfCnpj" required placeholder="ex: 000.000.000-00 ou 00.000.000/0000-00" maxlength="18">
                         <button type="button" id="btnConsultarCNPJ" class="btn-consultar" disabled>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -429,7 +429,7 @@
 
                 <div class="form-group">
                     <label>RG / Inscrição Estadual <span>*</span></label>
-                    <input type="text" name="rg_ie" id="rgIe" required placeholder="00.000.000-0 ou 000.000.000.000" maxlength="16">
+                    <input type="text" name="rg_ie" id="rgIe" required placeholder="ex: 00.000.000-0 ou 000.000.000.000" maxlength="16">
                     <div id="rgIeError" class="error"></div>
                 </div>
             </div>
@@ -1244,7 +1244,7 @@
             
             try {
                 const formData = new FormData(this);
-                const response = await fetch('https://script.google.com/macros/s/AKfycbxdpNAo96Pn1bnhex-UCLG8rRHQBnmigbP7yDnJUAP_FSVpzzu-uyNmtrSo3kid92_H_w/exec', {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbxdpNAo96Pn1bnhex-UCLG8rRHQBnmigbP7yDnJUAP_FSVpzzu-uyNmtrSo3kid92_H_w', {
                     method: 'POST',
                     body: formData
                 });
