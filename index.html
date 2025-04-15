@@ -688,71 +688,80 @@
         // CONSULTA CNPJ COM OPEN CNPJ (API OFICIAL)
         // =============================================
 
-        async function consultarCNPJ(cnpj) {
+async function consultarCNPJ(cnpj) {
     const btnConsultar = document.getElementById('btnConsultarCNPJ');
     const cpfCnpjInput = document.getElementById('cpfCnpj');
     const nomeRazaoInput = document.getElementById('nomeRazao');
     const rgIeInput = document.getElementById('rgIe');
-    
+    const feedbackElement = document.getElementById('cpfCnpjErro');
+
     try {
-        // [Código de loading...]
+        // Configuração do loading...
+        btnConsultar.disabled = true;
+        btnConsultar.innerHTML = `<svg...>Consultando...</svg>`;
         
-        const response = await fetch(`https://open.cnpja.com/office/${cnpj.replace(/\D/g, '')}`, {
-            headers: { 'Authorization': 'Bearer 1df95279-b174-4c39-bef4-67e9b1e2e9ea-0c9d7930-13d1-4c38-8988-1eb6cedfab01' }
+        const cnpjNumeros = cnpj.replace(/\D/g, '');
+        const response = await fetch(`https://open.cnpja.com/office/${cnpjNumeros}`, {
+            headers: { 'Authorization': 'Bearer SEU_TOKEN_AQUI' }
         });
-        
+
         if (!response.ok) throw new Error('Erro na consulta à API');
         
         const data = await response.json();
-        
+        console.log('Dados completos da API:', data); // Para debug
+
         // 1. Preencher Razão Social
+        let razaoSocial = '';
         if (data.empresa?.nome) {
-            nomeRazaoInput.value = data.empresa.nome.toUpperCase();
-            
-            // 2. Buscar Inscrição Estadual
-            let ieEncontrada = '';
-            
-            // Verifica se existe o array de inscrições
-            if (data.inscrições && Array.isArray(data.inscrições)) {
-                // Procura por uma inscrição do tipo "IE Normal"
-                const ieNormal = data.inscrições.find(insc => 
-                    insc.tipo?.texto === "IE Normal" && insc.número
-                );
-                
-                if (ieNormal) {
-                    ieEncontrada = ieNormal.número;
-                    // Formata o número da IE (remove caracteres não numéricos)
-                    rgIeInput.value = ieEncontrada.replace(/\D/g, '');
-                }
-            }
-            
-            // Feedback visual
-            const feedbackElement = document.getElementById('cpfCnpjErro');
-            if (ieEncontrada) {
-                feedbackElement.innerHTML = `
-                    <span style="color: var(--success-color)">
-                        ✓ Razão Social e IE (${ieEncontrada}) preenchidos automaticamente
-                    </span>
-                `;
-                feedbackElement.style.color = 'var(--success-color)';
-            } else {
-                feedbackElement.textContent = '✓ Razão Social preenchida | IE não encontrada na consulta';
-                feedbackElement.style.color = 'var(--text-light)';
-            }
+            razaoSocial = data.empresa.nome.toUpperCase();
+            nomeRazaoInput.value = razaoSocial;
         } else {
-            throw new Error('Dados básicos não encontrados na resposta');
+            throw new Error('Razão Social não encontrada');
         }
-        
+
+        // 2. Buscar Inscrição Estadual
+        let ieEncontrada = '';
+        if (data.inscrições && Array.isArray(data.inscrições)) {
+            // Busca a primeira IE válida (com número e tipo IE Normal)
+            const ieValida = data.inscrições.find(insc => {
+                return insc.número && insc.tipo?.texto === "IE Normal";
+            });
+            
+            if (ieValida) {
+                ieEncontrada = ieValida.número.replace(/\D/g, '');
+                rgIeInput.value = ieEncontrada;
+            }
+        }
+
+        // 3. Feedback visual
+        if (ieEncontrada) {
+            feedbackElement.innerHTML = `
+                <span style="color: var(--success-color)">
+                    ✓ Dados preenchidos: Razão Social e IE ${ieEncontrada}
+                </span>
+            `;
+        } else {
+            feedbackElement.innerHTML = `
+                <span style="color: var(--text-light)">
+                    ✓ Razão Social preenchida | IE não consta nos registros
+                </span>
+            `;
+        }
+
     } catch (error) {
-        console.error('Erro ao consultar CNPJ:', error);
-        document.getElementById('cpfCnpjErro').textContent = error.message || 'Erro ao consultar CNPJ';
-        document.getElementById('cpfCnpjErro').style.color = 'var(--error-color)';
+        console.error('Erro na consulta:', error);
+        feedbackElement.innerHTML = `
+            <span style="color: var(--error-color)">
+                ! Erro: ${error.message || 'Falha na consulta'}
+            </span>
+        `;
         cpfCnpjInput.classList.add('invalid');
     } finally {
-        // [Código para restaurar botão...]
+        btnConsultar.innerHTML = `<svg...>Consultar</svg>`;
+        btnConsultar.disabled = false;
     }
 }
-
+        
         // =============================================
         // FUNCIONALIDADES DO FORMULÁRIO
         // =============================================
