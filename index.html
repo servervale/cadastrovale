@@ -743,7 +743,7 @@
             const ie = data.inscriptions.find(i => i.tipo?.texto === 'IE Normal');
             if (ie?.number) {
                 // Formatar a IE conforme o estado (exemplo para SP: 000.000.000.000)
-                let ieFormatada = ie.número;
+                let ieFormatada = ie.number;
                 if (ie.estado === 'SP') {
                     ieFormatada = ieFormatada.replace(/(\d{3})(\d{3})(\d{3})(\d{3})/, '$1.$2.$3.$4');
                 }
