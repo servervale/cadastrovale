@@ -372,59 +372,12 @@
                 <h2>Dados do Cliente</h2>
 
                 <div class="form-group">
-    <label>Vendedor <span>*</span></label>
-    <select name="vendedor" id="vendedorSelect" required>
-        <option value="">Carregando vendedores...</option>
-    </select>
-</div>
-// Função para carregar vendedores
-async function carregarVendedores() {
-    const select = document.getElementById('vendedorSelect');
-    select.innerHTML = '<option value="">Carregando vendedores...</option>';
-    
-    try {
-        const response = await fetch('https://script.google.com/macros/s/AKfycbzHwIggVl6Sc-n9BcxJphpTknnYSmXXlkBzv2kPuGPb3ZehtCM8mwcA11-jNR8hy2PLDA/exec');
-        const data = await response.json();
-        
-        if (data.result === 'success') {
-            select.innerHTML = '<option value="">Selecione um vendedor</option>';
-            
-            // Ordena os vendedores alfabeticamente
-            data.vendedores.sort((a, b) => a.localeCompare(b));
-            
-            // Adiciona cada vendedor como opção
-            data.vendedores.forEach(vendedor => {
-                const option = document.createElement('option');
-                option.value = vendedor;
-                option.textContent = vendedor;
-                select.appendChild(option);
-            });
-        } else {
-            select.innerHTML = '<option value="">Erro ao carregar vendedores</option>';
-            console.error('Erro ao carregar vendedores:', data.error);
-        }
-    } catch (error) {
-        select.innerHTML = '<option value="">Erro de conexão</option>';
-        console.error('Erro ao carregar vendedores:', error);
-        
-        // Fallback com lista estática caso a API falhe
-        const vendedoresFallback = [
-            "CLEIDE FRANCO", "FABIO PEREIRA", "GERSON", "GUILHERME", 
-            "GUSTAVO LESSE", "JULIAN PADOVAN", "NADIA", "PEDRO PAULO",
-            "RAUL", "REGINALDO DE ALMEIDA", "RUDSON", "TAMIRES", "WALTER VALE"
-        ];
-        
-        vendedoresFallback.forEach(vendedor => {
-            const option = document.createElement('option');
-            option.value = vendedor;
-            option.textContent = vendedor;
-            select.appendChild(option);
-        });
-    }
-}
+                    <label>Vendedor <span>*</span></label>
+                    <select name="vendedor" id="vendedorSelect" required>
+                        <option value="">Carregando vendedores...</option>
+                    </select>
+                </div>
 
-// Chama a função quando o DOM estiver carregado
-document.addEventListener('DOMContentLoaded', carregarVendedores);
                 <div class="form-group">
                     <label>Vendedor Compartilhado</label>
                     <input type="text" name="vendedor_compartilhado" placeholder="Opcional" class="uppercase">
@@ -612,14 +565,53 @@ document.addEventListener('DOMContentLoaded', carregarVendedores);
     </div>
 
     <script>
-        // Variáveis globais
-        const steps = document.querySelectorAll('.form-step');
-        const nextBtn = document.querySelector(".btn-next");
-        const prevBtn = document.querySelector(".btn-prev");
-        const submitBtn = document.querySelector(".btn-submit");
-        const progressBar = document.getElementById('progressBar');
-        const stepDots = document.querySelectorAll('.step-dot');
-        let currentStep = 0;
+        // =============================================
+        // FUNÇÃO PARA CARREGAR VENDEDORES
+        // =============================================
+        async function carregarVendedores() {
+            const select = document.getElementById('vendedorSelect');
+            select.innerHTML = '<option value="">Carregando vendedores...</option>';
+            
+            try {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbzHwIggVl6Sc-n9BcxJphpTknnYSmXXlkBzv2kPuGPb3ZehtCM8mwcA11-jNR8hy2PLDA/exec');
+                const data = await response.json();
+                
+                if (data.result === 'success') {
+                    select.innerHTML = '<option value="">Selecione um vendedor</option>';
+                    
+                    // Ordena os vendedores alfabeticamente
+                    data.vendedores.sort((a, b) => a.localeCompare(b));
+                    
+                    // Adiciona cada vendedor como opção
+                    data.vendedores.forEach(vendedor => {
+                        const option = document.createElement('option');
+                        option.value = vendedor;
+                        option.textContent = vendedor;
+                        select.appendChild(option);
+                    });
+                } else {
+                    select.innerHTML = '<option value="">Erro ao carregar vendedores</option>';
+                    console.error('Erro ao carregar vendedores:', data.error);
+                }
+            } catch (error) {
+                select.innerHTML = '<option value="">Erro de conexão</option>';
+                console.error('Erro ao carregar vendedores:', error);
+                
+                // Fallback com lista estática caso a API falhe
+                const vendedoresFallback = [
+                    "CLEIDE FRANCO", "FABIO PEREIRA", "GERSON", "GUILHERME", 
+                    "GUSTAVO LESSE", "JULIAN PADOVAN", "NADIA", "PEDRO PAULO",
+                    "RAUL", "REGINALDO DE ALMEIDA", "RUDSON", "TAMIRES", "WALTER VALE"
+                ];
+                
+                vendedoresFallback.forEach(vendedor => {
+                    const option = document.createElement('option');
+                    option.value = vendedor;
+                    option.textContent = vendedor;
+                    select.appendChild(option);
+                });
+            }
+        }
 
         // =============================================
         // VALIDAÇÃO DE CPF/CNPJ (ROBUSTA)
@@ -723,106 +715,106 @@ document.addEventListener('DOMContentLoaded', carregarVendedores);
         // =============================================
 
         async function consultarCNPJ(cnpj) {
-    const btnConsultar = document.getElementById('btnConsultarCNPJ');
-    const cpfCnpjInput = document.getElementById('cpfCnpj');
-    const nomeRazaoInput = document.getElementById('nomeRazao');
-    const rgIeInput = document.getElementById('rgIe');
-    const cpfCnpjErroElement = document.getElementById('cpfCnpjErro');
-    
-    try {
-        // Mostrar loading
-        btnConsultar.innerHTML = `
-            <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="loading">
-                <path d="M12 2a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1zm8.66-10a1 1 0 0 1-.366 1.366l-2.598 1.5a1 1 0 1 1-1-1.732l2.598-1.5A1 1 0 0 1 20.66 7zM7.67 14.5a1 1 0 0 1-.366 1.366l-2.598 1.5a1 1 0 1 1-1-1.732l2.598-1.5a1 1 0 0 1 1.366.366zM20.66 17a1 1 0 0 1-1.366.366l-2.598-1.5a1 1 0 1 1 1-1.732l2.598 1.5A1 1 0 0 1 20.66 17zM7.67 9.5a1 1 0 0 1-1.366.366l-2.598-1.5a1 1 0 1 1 1-1.732l2.598 1.5A1 1 0 0 1 7.67 9.5z" fill="currentColor"/>
-            </svg>
-            Consultando...
-        `;
-        btnConsultar.disabled = true;
-        cpfCnpjInput.disabled = true;
-        
-        // Limpar erros anteriores
-        cpfCnpjInput.classList.remove('invalid');
-        cpfCnpjErroElement.textContent = '';
-        
-        const cnpjNumeros = cnpj.replace(/\D/g, '');
-        
-        // Verificar se é um CNPJ válido antes de consultar
-        if (cnpjNumeros.length !== 14 || !validarCNPJ(cnpjNumeros)) {
-            throw new Error('CNPJ inválido');
-        }
-        
-        // Fazer a consulta na API Open CNPJ
-        const response = await fetch(`https://open.cnpja.com/office/${cnpjNumeros}`, {
-            headers: {
-                'Authorization': 'Bearer 1df95279-b174-4c39-bef4-67e9b1e2e9ea-0c9d7930-13d1-4c38-8988-1eb6cedfab01'
-            }
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Erro na consulta à API');
-        }
-        
-        const data = await response.json();
-        console.log('Dados retornados pela API:', data);
-        let mensagensSucesso = [];
-        
-        // Preencher Razão Social se disponível
-        if (data.company?.name) {
-            nomeRazaoInput.value = data.company.name.toUpperCase();
-            mensagensSucesso.push('Razão Social preenchida');
-        }
-        
-        // CORREÇÃO: Preencher Inscrição Estadual - Versão mais robusta
-        if (data.registrations && Array.isArray(data.registrations)) {
-            // Tenta encontrar a IE Normal primeiro
-            let ie = data.registrations.find(i => i.type?.text === 'IE Normal');
+            const btnConsultar = document.getElementById('btnConsultarCNPJ');
+            const cpfCnpjInput = document.getElementById('cpfCnpj');
+            const nomeRazaoInput = document.getElementById('nomeRazao');
+            const rgIeInput = document.getElementById('rgIe');
+            const cpfCnpjErroElement = document.getElementById('cpfCnpjErro');
             
-            // Se não encontrar, pega a primeira inscrição disponível
-            if (!ie && data.registrations.length > 0) {
-                ie = data.registrations[0];
-            }
-            
-            if (ie?.number) {
-                // Remove qualquer formatação existente
-                let ieNumeros = ie.number.replace(/\D/g, '');
+            try {
+                // Mostrar loading
+                btnConsultar.innerHTML = `
+                    <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="loading">
+                        <path d="M12 2a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1zm8.66-10a1 1 0 0 1-.366 1.366l-2.598 1.5a1 1 0 1 1-1-1.732l2.598-1.5A1 1 0 0 1 20.66 7zM7.67 14.5a1 1 0 0 1-.366 1.366l-2.598 1.5a1 1 0 1 1-1-1.732l2.598-1.5a1 1 0 0 1 1.366.366zM20.66 17a1 1 0 0 1-1.366.366l-2.598-1.5a1 1 0 1 1 1-1.732l2.598 1.5A1 1 0 0 1 20.66 17zM7.67 9.5a1 1 0 0 1-1.366.366l-2.598-1.5a1 1 0 1 1 1-1.732l2.598 1.5A1 1 0 0 1 7.67 9.5z" fill="currentColor"/>
+                    </svg>
+                    Consultando...
+                `;
+                btnConsultar.disabled = true;
+                cpfCnpjInput.disabled = true;
                 
-                // Formatar apenas se for de SP (12 dígitos)
-                if (ie.state === 'SP' && ieNumeros.length === 12) {
-                    rgIeInput.value = ieNumeros.replace(/(\d{3})(\d{3})(\d{3})(\d{3})/, '$1.$2.$3.$4');
-                } else {
-                    rgIeInput.value = ie.number; // Mantém o formato original
+                // Limpar erros anteriores
+                cpfCnpjInput.classList.remove('invalid');
+                cpfCnpjErroElement.textContent = '';
+                
+                const cnpjNumeros = cnpj.replace(/\D/g, '');
+                
+                // Verificar se é um CNPJ válido antes de consultar
+                if (cnpjNumeros.length !== 14 || !validarCNPJ(cnpjNumeros)) {
+                    throw new Error('CNPJ inválido');
                 }
-                mensagensSucesso.push('Inscrição Estadual preenchida');
+                
+                // Fazer a consulta na API Open CNPJ
+                const response = await fetch(`https://open.cnpja.com/office/${cnpjNumeros}`, {
+                    headers: {
+                        'Authorization': 'Bearer 1df95279-b174-4c39-bef4-67e9b1e2e9ea-0c9d7930-13d1-4c38-8988-1eb6cedfab01'
+                    }
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erro na consulta à API');
+                }
+                
+                const data = await response.json();
+                console.log('Dados retornados pela API:', data);
+                let mensagensSucesso = [];
+                
+                // Preencher Razão Social se disponível
+                if (data.company?.name) {
+                    nomeRazaoInput.value = data.company.name.toUpperCase();
+                    mensagensSucesso.push('Razão Social preenchida');
+                }
+                
+                // CORREÇÃO: Preencher Inscrição Estadual - Versão mais robusta
+                if (data.registrations && Array.isArray(data.registrations)) {
+                    // Tenta encontrar a IE Normal primeiro
+                    let ie = data.registrations.find(i => i.type?.text === 'IE Normal');
+                    
+                    // Se não encontrar, pega a primeira inscrição disponível
+                    if (!ie && data.registrations.length > 0) {
+                        ie = data.registrations[0];
+                    }
+                    
+                    if (ie?.number) {
+                        // Remove qualquer formatação existente
+                        let ieNumeros = ie.number.replace(/\D/g, '');
+                        
+                        // Formatar apenas se for de SP (12 dígitos)
+                        if (ie.state === 'SP' && ieNumeros.length === 12) {
+                            rgIeInput.value = ieNumeros.replace(/(\d{3})(\d{3})(\d{3})(\d{3})/, '$1.$2.$3.$4');
+                        } else {
+                            rgIeInput.value = ie.number; // Mantém o formato original
+                        }
+                        mensagensSucesso.push('Inscrição Estadual preenchida');
+                    }
+                }
+                
+                // Mostrar feedback consolidado
+                if (mensagensSucesso.length > 0) {
+                    cpfCnpjErroElement.textContent = mensagensSucesso.join(', ') + ' automaticamente';
+                    cpfCnpjErroElement.style.color = 'var(--success-color)';
+                } else {
+                    cpfCnpjErroElement.textContent = 'CNPJ válido, mas nenhum dado adicional encontrado';
+                    cpfCnpjErroElement.style.color = 'var(--text-light)';
+                }
+                
+            } catch (error) {
+                console.error('Erro ao consultar CNPJ:', error);
+                cpfCnpjErroElement.textContent = error.message || 'Erro ao consultar CNPJ';
+                cpfCnpjErroElement.style.color = 'var(--error-color)';
+                cpfCnpjInput.classList.add('invalid');
+            } finally {
+                // Restaurar botão
+                btnConsultar.innerHTML = `
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Consultar
+                `;
+                btnConsultar.disabled = false;
+                cpfCnpjInput.disabled = false;
             }
         }
-        
-        // Mostrar feedback consolidado
-        if (mensagensSucesso.length > 0) {
-            cpfCnpjErroElement.textContent = mensagensSucesso.join(', ') + ' automaticamente';
-            cpfCnpjErroElement.style.color = 'var(--success-color)';
-        } else {
-            cpfCnpjErroElement.textContent = 'CNPJ válido, mas nenhum dado adicional encontrado';
-            cpfCnpjErroElement.style.color = 'var(--text-light)';
-        }
-        
-    } catch (error) {
-        console.error('Erro ao consultar CNPJ:', error);
-        cpfCnpjErroElement.textContent = error.message || 'Erro ao consultar CNPJ';
-        cpfCnpjErroElement.style.color = 'var(--error-color)';
-        cpfCnpjInput.classList.add('invalid');
-    } finally {
-        // Restaurar botão
-        btnConsultar.innerHTML = `
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Consultar
-        `;
-        btnConsultar.disabled = false;
-        cpfCnpjInput.disabled = false;
-    }
-}
         // =============================================
         // FUNCIONALIDADES DO FORMULÁRIO
         // =============================================
