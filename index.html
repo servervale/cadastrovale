@@ -738,10 +738,11 @@
             mensagensSucesso.push('Razão Social preenchida');
         }
         
-        // Preencher Inscrição Estadual se disponível
-        if (data.inscrições?.length > 0) {
-            const ie = data.inscrições.find(i => i.tipo?.texto === 'IE Normal');
-            if (ie?.number) {
+        // CORREÇÃO: Preencher Inscrição Estadual
+        if (data.inscrições && data.inscrições.length > 0) {
+            // Pega a primeira inscrição disponível
+            const ie = data.inscrições[0];
+            if (ie.number) {
                 // Formatar a IE conforme o estado (exemplo para SP: 000.000.000.000)
                 let ieFormatada = ie.number;
                 if (ie.estado === 'SP') {
@@ -778,7 +779,6 @@
         cpfCnpjInput.disabled = false;
     }
 }
-
         // =============================================
         // FUNCIONALIDADES DO FORMULÁRIO
         // =============================================
