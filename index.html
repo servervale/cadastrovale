@@ -622,6 +622,17 @@
     }
 }
 
+// =============================================
+// VARIÁVEIS GLOBAIS PARA CONTROLE DOS PASSOS
+// =============================================
+let currentStep = 0;
+const steps = document.querySelectorAll('.form-step');
+const progressBar = document.getElementById('progressBar');
+const stepDots = document.querySelectorAll('.step-dot');
+const prevBtn = document.querySelector('.btn-prev');
+const nextBtn = document.querySelector('.btn-next');
+const submitBtn = document.querySelector('.btn-submit');
+
 // Inicialização otimizada
 function init() {
     // Verificar se o select existe
@@ -862,20 +873,37 @@ init();
         }
 
         function showStep(index) {
-            steps.forEach((step, i) => {
-                step.classList.toggle('active', i === index);
-            });
-            
-            prevBtn.style.display = index === 0 ? 'none' : 'flex';
-            nextBtn.style.display = index === steps.length - 1 ? 'none' : 'flex';
-            submitBtn.style.display = index === steps.length - 1 ? 'flex' : 'none';
-            
-            if (index === steps.length - 1) {
-                generateSummary();
-            }
-            
-            updateProgress();
-        }
+    // Verifica limites
+    if (index < 0) index = 0;
+    if (index >= steps.length) index = steps.length - 1;
+    
+    // Atualiza passo atual
+    currentStep = index;
+    
+    // Mostra/oculta steps
+    steps.forEach((step, i) => {
+        step.classList.toggle('active', i === index);
+    });
+    
+    // Atualiza controles de navegação
+    prevBtn.style.display = index === 0 ? 'none' : 'flex';
+    nextBtn.style.display = index === steps.length - 1 ? 'none' : 'flex';
+    submitBtn.style.display = index === steps.length - 1 ? 'flex' : 'none';
+    
+    // Atualiza indicador de progresso
+    updateProgress();
+    
+    // Rolagem suave para o topo
+    window.scrollTo({
+        top: document.querySelector('.form-container').offsetTop - 20,
+        behavior: 'smooth'
+    });
+    
+    // Gera resumo se for a última etapa
+    if (index === steps.length - 1) {
+        generateSummary();
+    }
+}
 
         function generateSummary() {
             const form = document.getElementById('multiForm');
