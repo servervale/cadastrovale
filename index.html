@@ -372,25 +372,59 @@
                 <h2>Dados do Cliente</h2>
 
                 <div class="form-group">
-                    <label>Vendedor <span>*</span></label>
-                    <select name="vendedor" required>
-                        <option value="">Selecione um vendedor</option>
-                        <option>CLEIDE FRANCO</option>
-                        <option>FABIO PEREIRA</option>
-                        <option>GERSON</option>
-                        <option>GUILHERME</option>
-                        <option>GUSTAVO LESSE</option>
-                        <option>JULIAN PADOVAN</option>
-                        <option>NADIA</option>
-                        <option>PEDRO PAULO</option>
-                        <option>RAUL</option>
-                        <option>REGINALDO DE ALMEIDA</option>
-                        <option>RUDSON</option>
-                        <option>TAMIRES</option>
-                        <option>WALTER VALE</option>
-                    </select>
-                </div>
+    <label>Vendedor <span>*</span></label>
+    <select name="vendedor" id="vendedorSelect" required>
+        <option value="">Carregando vendedores...</option>
+    </select>
+</div>
+// Função para carregar vendedores
+async function carregarVendedores() {
+    const select = document.getElementById('vendedorSelect');
+    select.innerHTML = '<option value="">Carregando vendedores...</option>';
+    
+    try {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbzHwIggVl6Sc-n9BcxJphpTknnYSmXXlkBzv2kPuGPb3ZehtCM8mwcA11-jNR8hy2PLDA/exec');
+        const data = await response.json();
+        
+        if (data.result === 'success') {
+            select.innerHTML = '<option value="">Selecione um vendedor</option>';
+            
+            // Ordena os vendedores alfabeticamente
+            data.vendedores.sort((a, b) => a.localeCompare(b));
+            
+            // Adiciona cada vendedor como opção
+            data.vendedores.forEach(vendedor => {
+                const option = document.createElement('option');
+                option.value = vendedor;
+                option.textContent = vendedor;
+                select.appendChild(option);
+            });
+        } else {
+            select.innerHTML = '<option value="">Erro ao carregar vendedores</option>';
+            console.error('Erro ao carregar vendedores:', data.error);
+        }
+    } catch (error) {
+        select.innerHTML = '<option value="">Erro de conexão</option>';
+        console.error('Erro ao carregar vendedores:', error);
+        
+        // Fallback com lista estática caso a API falhe
+        const vendedoresFallback = [
+            "CLEIDE FRANCO", "FABIO PEREIRA", "GERSON", "GUILHERME", 
+            "GUSTAVO LESSE", "JULIAN PADOVAN", "NADIA", "PEDRO PAULO",
+            "RAUL", "REGINALDO DE ALMEIDA", "RUDSON", "TAMIRES", "WALTER VALE"
+        ];
+        
+        vendedoresFallback.forEach(vendedor => {
+            const option = document.createElement('option');
+            option.value = vendedor;
+            option.textContent = vendedor;
+            select.appendChild(option);
+        });
+    }
+}
 
+// Chama a função quando o DOM estiver carregado
+document.addEventListener('DOMContentLoaded', carregarVendedores);
                 <div class="form-group">
                     <label>Vendedor Compartilhado</label>
                     <input type="text" name="vendedor_compartilhado" placeholder="Opcional" class="uppercase">
