@@ -697,60 +697,59 @@
     try {
         // [Código de loading...]
         
-        const response = await fetch(`https://open.cnpja.com/office/${cnpjNumeros}`, {
-            headers: { 'Authorization': 'Bearer SEU_TOKEN_AQUI' }
+        const response = await fetch(`https://open.cnpja.com/office/${cnpj.replace(/\D/g, '')}`, {
+            headers: { 'Authorization': 'Bearer 1df95279-b174-4c39-bef4-67e9b1e2e9ea-0c9d7930-13d1-4c38-8988-1eb6cedfab01' }
         });
+        
+        if (!response.ok) throw new Error('Erro na consulta à API');
         
         const data = await response.json();
         
         // 1. Preencher Razão Social
-        if (data.company?.name) {
-            nomeRazaoInput.value = data.company.name.toUpperCase();
+        if (data.empresa?.nome) {
+            nomeRazaoInput.value = data.empresa.nome.toUpperCase();
             
             // 2. Buscar Inscrição Estadual
             let ieEncontrada = '';
             
-            // Método 1: Busca direta em inscrições
-            if (data.inscrições?.length > 0) {
-                // Encontra a primeira IE válida (com número e tipo IE Normal)
-                const ieValida = data.inscrições.find(insc => 
-                    insc.número && 
-                    (insc.tipo?.texto === "IE Normal" || !insc.tipo)
+            // Verifica se existe o array de inscrições
+            if (data.inscrições && Array.isArray(data.inscrições)) {
+                // Procura por uma inscrição do tipo "IE Normal"
+                const ieNormal = data.inscrições.find(insc => 
+                    insc.tipo?.texto === "IE Normal" && insc.número
                 );
                 
-                if (ieValida?.número) {
-                    ieEncontrada = ieValida.número;
-                    // Remove caracteres não numéricos e formata
+                if (ieNormal) {
+                    ieEncontrada = ieNormal.número;
+                    // Formata o número da IE (remove caracteres não numéricos)
                     rgIeInput.value = ieEncontrada.replace(/\D/g, '');
                 }
             }
             
-            // Método 2: Alternativa caso a IE esteja em outro local
-            if (!ieEncontrada && data.registration?.state) {
-                ieEncontrada = data.registration.state;
-                rgIeInput.value = ieEncontrada.replace(/\D/g, '');
-            }
-            
             // Feedback visual
+            const feedbackElement = document.getElementById('cpfCnpjErro');
             if (ieEncontrada) {
-                document.getElementById('cpfCnpjErro').innerHTML = `
+                feedbackElement.innerHTML = `
                     <span style="color: var(--success-color)">
-                        ✓ Razão Social e IE preenchidos automaticamente
+                        ✓ Razão Social e IE (${ieEncontrada}) preenchidos automaticamente
                     </span>
                 `;
+                feedbackElement.style.color = 'var(--success-color)';
             } else {
-                document.getElementById('cpfCnpjErro').innerHTML = `
-                    <span style="color: var(--text-light)">
-                        ✓ Razão Social preenchida | IE não encontrada na consulta
-                    </span>
-                `;
+                feedbackElement.textContent = '✓ Razão Social preenchida | IE não encontrada na consulta';
+                feedbackElement.style.color = 'var(--text-light)';
             }
+        } else {
+            throw new Error('Dados básicos não encontrados na resposta');
         }
         
     } catch (error) {
-        // [Tratamento de erros...]
+        console.error('Erro ao consultar CNPJ:', error);
+        document.getElementById('cpfCnpjErro').textContent = error.message || 'Erro ao consultar CNPJ';
+        document.getElementById('cpfCnpjErro').style.color = 'var(--error-color)';
+        cpfCnpjInput.classList.add('invalid');
     } finally {
-        // [Restaurar botão...]
+        // [Código para restaurar botão...]
     }
 }
 
