@@ -739,7 +739,7 @@
         }
         
         // Preencher Inscrição Estadual se disponível
-        if (data.inscriptions?.length > 0) {
+        if (data.inscrições?.length > 0) {
             const ie = data.inscriptions.find(i => i.tipo?.texto === 'IE Normal');
             if (ie?.número) {
                 // Formatar a IE conforme o estado (exemplo para SP: 000.000.000.000)
