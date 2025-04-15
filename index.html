@@ -740,7 +740,7 @@
         }
         
         // CORREÇÃO: Preencher Inscrição Estadual - Versão mais robusta
-        if (data.inscrições && Array.isArray(data.inscrições) {
+        if (data.inscrições && Array.isArray(data.inscrições)) {
             // Tenta encontrar a IE Normal primeiro
             let ie = data.inscrições.find(i => i.tipo?.texto === 'IE Normal');
             
