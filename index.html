@@ -1195,9 +1195,16 @@
                 return;
             }
             
-            if (valor.length <= 9) {
+            // Verifica se é um RG de 8 dígitos (formato XX.XXX.XXX)
+            if (valor.length <= 8) {
+                valor = valor.replace(/(\d{2})(\d{3})(\d{3})/, '$1.$2.$3');
+            } 
+            // Verifica se é um RG de 9 dígitos (formato XX.XXX.XXX-X)
+            else if (valor.length <= 9) {
                 valor = valor.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4');
-            } else {
+            } 
+            // Verifica se é uma IE (Inscrição Estadual) com 12 dígitos (formato XXX.XXX.XXX.XXX)
+            else {
                 valor = valor.replace(/(\d{3})(\d{3})(\d{3})(\d{3})/, '$1.$2.$3.$4');
             }
             campo.value = valor;
