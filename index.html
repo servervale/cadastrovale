@@ -122,6 +122,14 @@
             position: relative;
         }
         
+        .checkbox-hidden {
+            display: none !important;
+        }
+        
+        .checkbox-visible {
+            display: flex !important;
+        }
+        
         label {
             display: block;
             margin-bottom: 8px;
@@ -142,6 +150,11 @@
             font-family: 'Poppins', sans-serif;
             transition: var(--transition);
             background-color: #fafafa;
+        }
+        
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
         }
         
         input:focus, select:focus, textarea:focus {
@@ -283,7 +296,6 @@
             color: var(--success-color);
         }
 
-        /* Novos estilos para a consulta de CNPJ */
         .cnpj-container {
             display: flex;
             gap: 10px;
@@ -403,9 +415,14 @@
                 </div>
 
                 <div class="form-group">
-                    <label>RG / Inscrição Estadual <span>*</span></label>
+                    <label>RG / Inscrição Estadual <span id="rgIeRequired">*</span></label>
                     <input type="text" name="rg_ie" id="rgIe" required placeholder="ex: 00.000.000-0 ou 000.000.000.000" maxlength="16">
                     <div id="rgIeError" class="error"></div>
+                </div>
+
+                <div class="form-group checkbox-hidden" id="contribuinteIsentoGroup" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="contribuinteIsento" style="margin: 0; width: auto;">
+                    <label for="contribuinteIsento" style="margin-bottom: 0; font-weight: normal;">Cliente é CONTRIBUINTE ISENTO (Sujeito ao ICMS, mas não possui inscrição estadual)</label>
                 </div>
             </div>
 
@@ -570,88 +587,74 @@
         // =============================================
 
         async function carregarVendedores() {
-    const select = document.getElementById('vendedorSelect');
-    
-    try {
-        // 1. Mostrar estado de carregamento
-        select.innerHTML = '<option value="">Carregando vendedores...</option>';
-        
-        // 2. Fazer a requisição com cache busting
-        const response = await fetch('https://script.google.com/macros/s/AKfycbzHwIggVl6Sc-n9BcxJphpTknnYSmXXlkBzv2kPuGPb3ZehtCM8mwcA11-jNR8hy2PLDA/exec?t=' + Date.now());
-        
-        // 3. Verificar resposta
-        if (!response.ok) throw new Error(`Erro: ${response.status}`);
-        
-        // 4. Processar SEU formato específico de JSON
-        const { status, data } = await response.json();
-        
-        if (status !== "success" || !Array.isArray(data)) {
-            throw new Error("Formato de dados inválido");
-        }
-        
-        // 5. Limpar e preencher o select
-        select.innerHTML = '<option value="">Selecione o vendedor</option>';
-        
-        // 6. Filtrar, ordenar e adicionar opções
-        data
-            .filter(vendedor => typeof vendedor === 'string' && vendedor.trim() !== '')
-            .sort((a, b) => a.trim().localeCompare(b.trim()))
-            .forEach(vendedor => {
-                const option = new Option(vendedor.trim(), vendedor.trim());
-                select.add(option);
-            });
+            const select = document.getElementById('vendedorSelect');
             
-        console.log('Vendedores carregados com sucesso!');
-        
-    } catch (error) {
-        console.error('Erro ao carregar vendedores:', error);
-        
-        // 7. Fallback para caso de erro
-        select.innerHTML = '<option value="">Erro ao carregar</option>';
-        
-        // Lista de fallback baseada no seu JSON
-        const fallback = [
-            "WALTER VALE", "CLEIDE FRANCO", "FABIO PEREIRA", 
-            "GERSON", "GUILHERME", "TAMIRES"
-        ];
-        
-        fallback.forEach(vendedor => {
-            const option = new Option(vendedor, vendedor);
-            select.add(option);
-        });
-    }
-}
+            try {
+                select.innerHTML = '<option value="">Carregando vendedores...</option>';
+                
+                const response = await fetch('https://script.google.com/macros/s/AKfycbzHwIggVl6Sc-n9BcxJphpTknnYSmXXlkBzv2kPuGPb3ZehtCM8mwcA11-jNR8hy2PLDA/exec?t=' + Date.now());
+                
+                if (!response.ok) throw new Error(`Erro: ${response.status}`);
+                
+                const { status, data } = await response.json();
+                
+                if (status !== "success" || !Array.isArray(data)) {
+                    throw new Error("Formato de dados inválido");
+                }
+                
+                select.innerHTML = '<option value="">Selecione o vendedor</option>';
+                
+                data
+                    .filter(vendedor => typeof vendedor === 'string' && vendedor.trim() !== '')
+                    .sort((a, b) => a.trim().localeCompare(b.trim()))
+                    .forEach(vendedor => {
+                        const option = new Option(vendedor.trim(), vendedor.trim());
+                        select.add(option);
+                    });
+                    
+            } catch (error) {
+                console.error('Erro ao carregar vendedores:', error);
+                
+                select.innerHTML = '<option value="">Erro ao carregar</option>';
+                
+                const fallback = [
+                    "WALTER VALE", "CLEIDE FRANCO", "FABIO PEREIRA", 
+                    "GERSON", "GUILHERME", "TAMIRES"
+                ];
+                
+                fallback.forEach(vendedor => {
+                    const option = new Option(vendedor, vendedor);
+                    select.add(option);
+                });
+            }
+        }
 
-// =============================================
-// VARIÁVEIS GLOBAIS PARA CONTROLE DOS PASSOS
-// =============================================
-let currentStep = 0;
-const steps = document.querySelectorAll('.form-step');
-const progressBar = document.getElementById('progressBar');
-const stepDots = document.querySelectorAll('.step-dot');
-const prevBtn = document.querySelector('.btn-prev');
-const nextBtn = document.querySelector('.btn-next');
-const submitBtn = document.querySelector('.btn-submit');
+        // =============================================
+        // VARIÁVEIS GLOBAIS PARA CONTROLE DOS PASSOS
+        // =============================================
+        let currentStep = 0;
+        const steps = document.querySelectorAll('.form-step');
+        const progressBar = document.getElementById('progressBar');
+        const stepDots = document.querySelectorAll('.step-dot');
+        const prevBtn = document.querySelector('.btn-prev');
+        const nextBtn = document.querySelector('.btn-next');
+        const submitBtn = document.querySelector('.btn-submit');
 
-// Inicialização otimizada
-function init() {
-    // Verificar se o select existe
-    const select = document.getElementById('vendedorSelect');
-    if (!select) {
-        console.error('Elemento select não encontrado!');
-        return;
-    }
-    
-    // Carregar vendedores quando o DOM estiver pronto
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', carregarVendedores);
-    } else {
-        carregarVendedores();
-    }
-}
+        function init() {
+            const select = document.getElementById('vendedorSelect');
+            if (!select) {
+                console.error('Elemento select não encontrado!');
+                return;
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', carregarVendedores);
+            } else {
+                carregarVendedores();
+            }
+        }
 
-// Iniciar
-init();
+        init();
         
         // =============================================
         // VALIDAÇÃO DE CPF/CNPJ (ROBUSTA)
@@ -660,12 +663,10 @@ init();
         function validarCPF(cpf) { 
             cpf = cpf.replace(/\D/g, '');
             
-            // Verifica se tem 11 dígitos e não é uma sequência repetida
             if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) {
                 return false;
             }
 
-            // Valida 1º dígito verificador
             let soma = 0;
             for (let i = 0; i < 9; i++) {
                 soma += parseInt(cpf.charAt(i)) * (10 - i);
@@ -677,7 +678,6 @@ init();
                 return false;
             }
 
-            // Valida 2º dígito verificador
             soma = 0;
             for (let i = 0; i < 10; i++) {
                 soma += parseInt(cpf.charAt(i)) * (11 - i);
@@ -691,12 +691,10 @@ init();
         function validarCNPJ(cnpj) {
             cnpj = cnpj.replace(/\D/g, '');
             
-            // Verifica se tem 14 dígitos e não é uma sequência repetida
             if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) {
                 return false;
             }
 
-            // Valida 1º dígito verificador
             let tamanho = cnpj.length - 2;
             let numeros = cnpj.substring(0, tamanho);
             let digitos = cnpj.substring(tamanho);
@@ -715,7 +713,6 @@ init();
                 return false;
             }
 
-            // Valida 2º dígito verificador
             tamanho = tamanho + 1;
             numeros = cnpj.substring(0, tamanho);
             soma = 0;
@@ -760,9 +757,9 @@ init();
             const nomeRazaoInput = document.getElementById('nomeRazao');
             const rgIeInput = document.getElementById('rgIe');
             const cpfCnpjErroElement = document.getElementById('cpfCnpjErro');
+            const contribuinteGroup = document.getElementById('contribuinteIsentoGroup');
             
             try {
-                // Mostrar loading
                 btnConsultar.innerHTML = `
                     <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="loading">
                         <path d="M12 2a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1zm8.66-10a1 1 0 0 1-.366 1.366l-2.598 1.5a1 1 0 1 1-1-1.732l2.598-1.5A1 1 0 0 1 20.66 7zM7.67 14.5a1 1 0 0 1-.366 1.366l-2.598 1.5a1 1 0 1 1-1-1.732l2.598-1.5a1 1 0 0 1 1.366.366zM20.66 17a1 1 0 0 1-1.366.366l-2.598-1.5a1 1 0 1 1 1-1.732l2.598 1.5A1 1 0 0 1 20.66 17zM7.67 9.5a1 1 0 0 1-1.366.366l-2.598-1.5a1 1 0 1 1 1-1.732l2.598 1.5A1 1 0 0 1 7.67 9.5z" fill="currentColor"/>
@@ -772,18 +769,15 @@ init();
                 btnConsultar.disabled = true;
                 cpfCnpjInput.disabled = true;
                 
-                // Limpar erros anteriores
                 cpfCnpjInput.classList.remove('invalid');
                 cpfCnpjErroElement.textContent = '';
                 
                 const cnpjNumeros = cnpj.replace(/\D/g, '');
                 
-                // Verificar se é um CNPJ válido antes de consultar
                 if (cnpjNumeros.length !== 14 || !validarCNPJ(cnpjNumeros)) {
                     throw new Error('CNPJ inválido');
                 }
                 
-                // Fazer a consulta na API Open CNPJ
                 const response = await fetch(`https://open.cnpja.com/office/${cnpjNumeros}`, {
                     headers: {
                         'Authorization': 'Bearer 1df95279-b174-4c39-bef4-67e9b1e2e9ea-0c9d7930-13d1-4c38-8988-1eb6cedfab01'
@@ -799,43 +793,44 @@ init();
                 console.log('Dados retornados pela API:', data);
                 let mensagensSucesso = [];
                 
-                // Preencher Razão Social se disponível
                 if (data.company?.name) {
                     nomeRazaoInput.value = data.company.name.toUpperCase();
                     mensagensSucesso.push('Razão Social preenchida');
                 }
                 
-                // CORREÇÃO: Preencher Inscrição Estadual - Versão mais robusta
                 if (data.registrations && Array.isArray(data.registrations)) {
-                    // Tenta encontrar a IE Normal primeiro
                     let ie = data.registrations.find(i => i.type?.text === 'IE Normal');
                     
-                    // Se não encontrar, pega a primeira inscrição disponível
                     if (!ie && data.registrations.length > 0) {
                         ie = data.registrations[0];
                     }
                     
                     if (ie?.number) {
-                        // Remove qualquer formatação existente
                         let ieNumeros = ie.number.replace(/\D/g, '');
                         
-                        // Formatar apenas se for de SP (12 dígitos)
                         if (ie.state === 'SP' && ieNumeros.length === 12) {
                             rgIeInput.value = ieNumeros.replace(/(\d{3})(\d{3})(\d{3})(\d{3})/, '$1.$2.$3.$4');
                         } else {
-                            rgIeInput.value = ie.number; // Mantém o formato original
+                            rgIeInput.value = ie.number;
                         }
                         mensagensSucesso.push('Inscrição Estadual preenchida');
                     }
                 }
                 
-                // Mostrar feedback consolidado
                 if (mensagensSucesso.length > 0) {
                     cpfCnpjErroElement.textContent = mensagensSucesso.join(', ') + ' automaticamente';
                     cpfCnpjErroElement.style.color = 'var(--success-color)';
+                    
+                    // Mostrar checkbox após consulta bem-sucedida
+                    contribuinteGroup.classList.remove('checkbox-hidden');
+                    contribuinteGroup.classList.add('checkbox-visible');
                 } else {
                     cpfCnpjErroElement.textContent = 'CNPJ válido, mas nenhum dado adicional encontrado';
                     cpfCnpjErroElement.style.color = 'var(--text-light)';
+                    
+                    // Mostrar checkbox mesmo sem dados adicionais
+                    contribuinteGroup.classList.remove('checkbox-hidden');
+                    contribuinteGroup.classList.add('checkbox-visible');
                 }
                 
             } catch (error) {
@@ -843,8 +838,11 @@ init();
                 cpfCnpjErroElement.textContent = error.message || 'Erro ao consultar CNPJ';
                 cpfCnpjErroElement.style.color = 'var(--error-color)';
                 cpfCnpjInput.classList.add('invalid');
+                
+                // Ocultar checkbox em caso de erro
+                document.getElementById('contribuinteIsentoGroup').classList.add('checkbox-hidden');
+                document.getElementById('contribuinteIsentoGroup').classList.remove('checkbox-visible');
             } finally {
-                // Restaurar botão
                 btnConsultar.innerHTML = `
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -855,6 +853,7 @@ init();
                 cpfCnpjInput.disabled = false;
             }
         }
+
         // =============================================
         // FUNCIONALIDADES DO FORMULÁRIO
         // =============================================
@@ -873,37 +872,30 @@ init();
         }
 
         function showStep(index) {
-    // Verifica limites
-    if (index < 0) index = 0;
-    if (index >= steps.length) index = steps.length - 1;
-    
-    // Atualiza passo atual
-    currentStep = index;
-    
-    // Mostra/oculta steps
-    steps.forEach((step, i) => {
-        step.classList.toggle('active', i === index);
-    });
-    
-    // Atualiza controles de navegação
-    prevBtn.style.display = index === 0 ? 'none' : 'flex';
-    nextBtn.style.display = index === steps.length - 1 ? 'none' : 'flex';
-    submitBtn.style.display = index === steps.length - 1 ? 'flex' : 'none';
-    
-    // Atualiza indicador de progresso
-    updateProgress();
-    
-    // Rolagem suave para o topo
-    window.scrollTo({
-        top: document.querySelector('.form-container').offsetTop - 20,
-        behavior: 'smooth'
-    });
-    
-    // Gera resumo se for a última etapa
-    if (index === steps.length - 1) {
-        generateSummary();
-    }
-}
+            if (index < 0) index = 0;
+            if (index >= steps.length) index = steps.length - 1;
+            
+            currentStep = index;
+            
+            steps.forEach((step, i) => {
+                step.classList.toggle('active', i === index);
+            });
+            
+            prevBtn.style.display = index === 0 ? 'none' : 'flex';
+            nextBtn.style.display = index === steps.length - 1 ? 'none' : 'flex';
+            submitBtn.style.display = index === steps.length - 1 ? 'flex' : 'none';
+            
+            updateProgress();
+            
+            window.scrollTo({
+                top: document.querySelector('.form-container').offsetTop - 20,
+                behavior: 'smooth'
+            });
+            
+            if (index === steps.length - 1) {
+                generateSummary();
+            }
+        }
 
         function generateSummary() {
             const form = document.getElementById('multiForm');
@@ -911,8 +903,7 @@ init();
             let summaryHTML = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
             
             inputs.forEach(input => {
-                if (input.name && input.value) {
-                    // Obtém o label correspondente
+                if (input.name && input.value && input.type !== 'checkbox') {
                     let label = '';
                     if (input.id) {
                         const labelElement = form.querySelector(`label[for="${input.id}"]`);
@@ -921,7 +912,6 @@ init();
                         }
                     }
                     
-                    // Se não encontrou pelo 'for', tenta pelo name
                     if (!label) {
                         const parentGroup = input.closest('.form-group');
                         if (parentGroup) {
@@ -932,7 +922,6 @@ init();
                         }
                     }
                     
-                    // Se ainda não encontrou, usa o name como fallback
                     if (!label) {
                         label = input.name.replace('_', ' ').toUpperCase();
                     }
@@ -955,12 +944,10 @@ init();
             let allValid = true;
             let errorDisplayed = false;
 
-            // Remove mensagens de erro anteriores
             const oldMsg = document.querySelector('.error-global');
             if (oldMsg) oldMsg.remove();
 
-            // Validação específica para cada etapa
-            if (currentStep === 0) { // Dados do Cliente
+            if (currentStep === 0) {
                 const cpfCnpjInput = document.getElementById('cpfCnpj');
                 const validacao = validarCpfCnpj(cpfCnpjInput.value);
                 
@@ -974,21 +961,23 @@ init();
                     }
                 }
                 
-                // Validação do RG/IE (8 a 12 dígitos)
+                const isIsento = document.getElementById('contribuinteIsento').checked;
                 const rgIeInput = document.getElementById('rgIe');
-                const rgIeValue = rgIeInput.value.replace(/\D/g, '');
                 
-                if (rgIeValue.length < 8 || rgIeValue.length > 12) {
-                    rgIeInput.classList.add('invalid');
-                    document.getElementById('rgIeError').textContent = 'RG/IE deve ter entre 8 e 12 dígitos';
-                    allValid = false;
-                    if (!errorDisplayed) {
-                        rgIeInput.focus();
-                        errorDisplayed = true;
+                if (!isIsento) {
+                    const rgIeValue = rgIeInput.value.replace(/\D/g, '');
+                    
+                    if (rgIeValue.length < 8 || rgIeValue.length > 12) {
+                        rgIeInput.classList.add('invalid');
+                        document.getElementById('rgIeError').textContent = 'RG/IE deve ter entre 8 e 12 dígitos';
+                        allValid = false;
+                        if (!errorDisplayed) {
+                            rgIeInput.focus();
+                            errorDisplayed = true;
+                        }
                     }
                 }
                 
-                // Validação reforçada para o vendedor
                 const vendedorSelect = document.querySelector('select[name="vendedor"]');
                 if (!vendedorSelect.value) {
                     vendedorSelect.classList.add('invalid');
@@ -998,7 +987,7 @@ init();
                         errorDisplayed = true;
                     }
                 }
-            } else if (currentStep === 1) { // Contato
+            } else if (currentStep === 1) {
                 const emailInput = document.getElementById('emailInput');
                 if (!validarEmail(emailInput.value)) {
                     emailInput.classList.add('invalid');
@@ -1020,7 +1009,7 @@ init();
                         errorDisplayed = true;
                     }
                 }
-            } else if (currentStep === 2) { // Endereço de Entrega
+            } else if (currentStep === 2) {
                 const cepInput = document.getElementById('cepEntrega');
                 if (!validarCEP(cepInput.value.replace(/\D/g, ''))) {
                     cepInput.classList.add('invalid');
@@ -1033,9 +1022,13 @@ init();
                 }
             }
 
-            // Validação geral de campos obrigatórios
             currentInputs.forEach(input => {
                 input.classList.remove('invalid');
+                
+                if (input.id === 'rgIe' && document.getElementById('contribuinteIsento').checked) {
+                    return;
+                }
+                
                 if (!input.value.trim()) {
                     input.classList.add('invalid');
                     allValid = false;
@@ -1053,10 +1046,9 @@ init();
                     msg.textContent = 'Por favor, corrija os campos destacados antes de continuar.';
                     steps[currentStep].insertBefore(msg, steps[currentStep].firstChild);
                 }
-                return; // Impede o avanço se houver erros
+                return;
             }
 
-            // Pular endereço de cobrança se marcado como igual
             if (currentStep === 2 && document.getElementById('usarMesmoEndereco').value === 'nao') {
                 currentStep++;
             }
@@ -1064,7 +1056,6 @@ init();
             currentStep++;
             showStep(currentStep);
             
-            // Rolagem suave para o topo do formulário
             window.scrollTo({
                 top: document.querySelector('.form-container').offsetTop - 20,
                 behavior: 'smooth'
@@ -1075,9 +1066,8 @@ init();
             const oldMsg = document.querySelector('.error-global');
             if (oldMsg) oldMsg.remove();
 
-            // Lógica para pular etapa de endereço se necessário
             if (currentStep === 4 && document.getElementById('usarMesmoEndereco').value === 'nao') {
-                currentStep -= 2; // Volta duas etapas (de pagamento direto para entrega)
+                currentStep -= 2;
             } else {
                 currentStep--;
             }
@@ -1093,61 +1083,46 @@ init();
         // FUNÇÕES AUXILIARES
         // =============================================
 
-        // Função para converter para maiúsculas
         function autoUppercase(input) {
-            // Não aplicar em email e link de localização
             if (input.type === 'email' || input.name === 'link_entrega') return;
             
-            // Não aplicar em campos numéricos
             const numericFields = ['cpf_cnpj', 'rg_ie', 'telefone1', 'telefone2', 'cep_entrega', 'cep_cobranca'];
             if (numericFields.includes(input.name)) return;
             
-            // Guarda a posição do cursor
             const start = input.selectionStart;
             const end = input.selectionEnd;
             
-            // Aplica uppercase
             input.value = input.value.toUpperCase();
             
-            // Restaura a posição do cursor
             input.setSelectionRange(start, end);
         }
 
-        // Validação de email
         function validarEmail(email) {
             const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return re.test(email);
         }
 
-        // Validação de telefone
         function validarTelefone(telefone) {
             const apenasNumeros = telefone.replace(/\D/g, '');
             return apenasNumeros.length >= 10 && apenasNumeros.length <= 11;
         }
 
-        // Validação de CEP
         function validarCEP(cep) {
             return cep.replace(/\D/g, '').length === 8;
         }
 
-        // Funções de máscara
         function mascaraTelefone(campo) {
             let valor = campo.value.replace(/\D/g, '');
             
-            // Limita a 11 caracteres (DDD + 9 dígitos)
             if (valor.length > 11) {
                 valor = valor.substring(0, 11);
             }
             
-            // Aplica a máscara
             if (valor.length > 10) {
-                // Formato para celular: (99) 99999-9999
                 campo.value = valor.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
             } else if (valor.length > 6) {
-                // Formato para fixo até 10 dígitos: (99) 9999-9999
                 campo.value = valor.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
             } else if (valor.length > 2) {
-                // Apenas formata o DDD: (99) 
                 campo.value = valor.replace(/(\d{2})/, '($1) ');
             } else {
                 campo.value = valor;
@@ -1157,25 +1132,28 @@ init();
         function mascaraCep(campo) {
             let valor = campo.value.replace(/\D/g, '');
             
-            // Limita a 8 caracteres
             if (valor.length > 8) {
                 valor = valor.substring(0, 8);
             }
             
-            // Aplica a máscara: 99999-999
             campo.value = valor.replace(/(\d{5})(\d{3})/, '$1-$2');
         }
 
         function mascaraCpfCnpj(campo) {
             const valor = campo.value.replace(/\D/g, '');
+            const contribuinteGroup = document.getElementById('contribuinteIsentoGroup');
             
-            // Limita a 14 caracteres
+            // Resetar checkbox
+            document.getElementById('contribuinteIsento').checked = false;
+            contribuinteGroup.classList.remove('checkbox-visible');
+            contribuinteGroup.classList.add('checkbox-hidden');
+            
+            // Aplicar máscara
             if (valor.length > 14) {
-                campo.value = campo.value.substring(0, 18); // 18 = tamanho máximo com máscara
+                campo.value = campo.value.substring(0, 18);
                 return;
             }
             
-            // Aplica a máscara conforme o tamanho
             if (valor.length <= 11) {
                 campo.value = valor.replace(/(\d{3})(\d)/, '$1.$2')
                                  .replace(/(\d{3})(\d)/, '$1.$2')
@@ -1186,7 +1164,7 @@ init();
                                  .replace(/(\d{3})(\d{4})(\d)/, '$1/$2-$3');
             }
             
-            // Validação em tempo real quando completo
+            // Validação
             if (valor.length === 11 || valor.length === 14) {
                 const validacao = validarCpfCnpj(campo.value);
                 if (!validacao.valido) {
@@ -1195,10 +1173,16 @@ init();
                 } else {
                     campo.classList.remove('invalid');
                     document.getElementById('cpfCnpjErro').textContent = '';
+                    
+                    // Mostrar checkbox apenas para CNPJ válido
+                    if (valor.length === 14) {
+                        contribuinteGroup.classList.remove('checkbox-hidden');
+                        contribuinteGroup.classList.add('checkbox-visible');
+                    }
                 }
             }
             
-            // Atualiza estado do botão de consulta
+            // Atualizar botão de consulta
             const btnConsultar = document.getElementById('btnConsultarCNPJ');
             btnConsultar.disabled = valor.length !== 14;
         }
@@ -1206,13 +1190,11 @@ init();
         function mascaraRgIe(campo) {
             let valor = campo.value.replace(/\D/g, '');
             
-            // Limita a 12 caracteres
             if (valor.length > 12) {
-                campo.value = campo.value.substring(0, 16); // 16 = tamanho máximo com máscara
+                campo.value = campo.value.substring(0, 16);
                 return;
             }
             
-            // Aplica máscara conforme o tamanho
             if (valor.length <= 9) {
                 valor = valor.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4');
             } else {
@@ -1226,14 +1208,12 @@ init();
         // =============================================
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Configura auto uppercase
             document.querySelectorAll('input[type="text"], textarea').forEach(input => {
                 input.addEventListener('input', function() {
                     autoUppercase(this);
                 });
             });
 
-            // Configura máscara e validação do CPF/CNPJ
             const cpfCnpjInput = document.getElementById('cpfCnpj');
             cpfCnpjInput.addEventListener('input', function() {
                 mascaraCpfCnpj(this);
@@ -1241,14 +1221,20 @@ init();
             
             cpfCnpjInput.addEventListener('blur', function() {
                 const valor = this.value.replace(/\D/g, '');
+                const contribuinteGroup = document.getElementById('contribuinteIsentoGroup');
+                
                 if (valor.length > 0 && (valor.length < 11 || (valor.length > 11 && valor.length < 14))) {
                     this.classList.add('invalid');
                     document.getElementById('cpfCnpjErro').textContent = 
                         valor.length < 11 ? 'CPF deve ter 11 dígitos' : 'CNPJ deve ter 14 dígitos';
+                    contribuinteGroup.classList.add('checkbox-hidden');
+                    contribuinteGroup.classList.remove('checkbox-visible');
+                } else if (valor.length === 14 && validarCNPJ(valor)) {
+                    contribuinteGroup.classList.remove('checkbox-hidden');
+                    contribuinteGroup.classList.add('checkbox-visible');
                 }
             });
 
-            // Configura botão de consulta CNPJ
             document.getElementById('btnConsultarCNPJ').addEventListener('click', function() {
                 const cnpj = document.getElementById('cpfCnpj').value;
                 if (cnpj.replace(/\D/g, '').length === 14) {
@@ -1259,7 +1245,6 @@ init();
                 }
             });
 
-            // Configura máscara do RG/IE
             const rgIeInput = document.getElementById('rgIe');
             rgIeInput.addEventListener('input', function() {
                 mascaraRgIe(this);
@@ -1273,7 +1258,6 @@ init();
                 }
             });
 
-            // Configura máscara para telefones
             document.getElementById('telefone1').addEventListener('input', function() {
                 mascaraTelefone(this);
             });
@@ -1282,7 +1266,6 @@ init();
                 mascaraTelefone(this);
             });
 
-            // Configura máscara para CEPs
             document.getElementById('cepEntrega').addEventListener('input', function() {
                 mascaraCep(this);
             });
@@ -1291,7 +1274,6 @@ init();
                 mascaraCep(this);
             });
 
-            // Validação de email apenas ao sair do campo
             const emailInput = document.getElementById('emailInput');
             emailInput.addEventListener('blur', function() {
                 if (!validarEmail(this.value)) {
@@ -1303,7 +1285,6 @@ init();
                 }
             });
 
-            // Validação de telefone apenas ao sair do campo
             const telefoneInput = document.getElementById('telefone1');
             telefoneInput.addEventListener('blur', function() {
                 if (!validarTelefone(this.value)) {
@@ -1315,7 +1296,6 @@ init();
                 }
             });
 
-            // Validação de CEP apenas ao sair do campo
             const cepInput = document.getElementById('cepEntrega');
             cepInput.addEventListener('blur', function() {
                 if (!validarCEP(this.value.replace(/\D/g, ''))) {
@@ -1327,15 +1307,27 @@ init();
                 }
             });
 
-            // Mostra a primeira etapa
+            document.getElementById('contribuinteIsento').addEventListener('change', function() {
+                const rgIeInput = document.getElementById('rgIe');
+                const rgIeRequired = document.getElementById('rgIeRequired');
+                
+                if (this.checked) {
+                    rgIeInput.removeAttribute('required');
+                    rgIeRequired.style.display = 'none';
+                    rgIeInput.classList.remove('invalid');
+                    document.getElementById('rgIeError').textContent = '';
+                } else {
+                    rgIeInput.setAttribute('required', '');
+                    rgIeRequired.style.display = 'inline';
+                }
+            });
+
             showStep(currentStep);
         });
 
-        // Envio do formulário
         document.getElementById('multiForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Mostrar loading no botão
             submitBtn.disabled = true;
             submitBtn.innerHTML = `
                 <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="animation: rotate 1s linear infinite;">
@@ -1358,7 +1350,6 @@ init();
                 console.log(result);
                 
                 if (response.ok) {
-                    // Mostrar mensagem de sucesso
                     const successMsg = `
                         <div class="success-message">
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1390,3 +1381,4 @@ init();
         });
     </script>
 </body>
+</html>
