@@ -39,6 +39,7 @@
             min-height: 100vh;
             padding: 30px 20px;
             position: relative;
+            overflow-x: hidden;
         }
         
         header {
@@ -51,15 +52,40 @@
             text-align: center;
             position: relative;
             width: 100%;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeInDown 0.6s ease-out forwards;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         header img {
             height: 70px;
             transition: var(--transition);
+            animation: pulse 2s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(1.05);
+            }
         }
         
         header img:hover {
-            transform: scale(1.05);
+            animation: none;
+            transform: scale(1.05) rotate(5deg);
         }
         
         header h1 {
@@ -70,6 +96,27 @@
             position: relative;
         }
         
+        header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: var(--secondary-color);
+            animation: expandWidth 0.8s ease-out 0.3s forwards;
+        }
+        
+        @keyframes expandWidth {
+            from {
+                width: 0;
+            }
+            to {
+                width: 50px;
+            }
+        }
+        
         .form-container {
             background: var(--card-color);
             padding: 30px;
@@ -78,10 +125,25 @@
             max-width: 700px;
             width: 100%;
             transition: var(--transition);
+            opacity: 0;
+            transform: scale(0.95);
+            animation: fadeInScale 0.6s ease-out 0.3s forwards;
+        }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
         
         .form-container:hover {
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-3px);
         }
         
         h2 {
@@ -101,6 +163,7 @@
             width: 50px;
             height: 2px;
             background: var(--secondary-color);
+            animation: expandWidth 0.6s ease-out;
         }
         
         .form-step {
@@ -120,6 +183,14 @@
         .form-group {
             margin-bottom: 20px;
             position: relative;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s ease-out;
+        }
+        
+        .form-step.active .form-group {
+            opacity: 1;
+            transform: translateY(0);
         }
         
         .checkbox-hidden {
@@ -216,11 +287,13 @@
         .btn-submit {
             background: var(--primary-dark);
             color: white;
+            transform: scale(0.9);
+            transition: all 0.3s ease-out 0.4s;
         }
         
         .btn-submit:hover {
             background: #0d4720;
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         
@@ -294,6 +367,7 @@
         .success-message {
             text-align: center;
             padding: 30px;
+            animation: fadeIn 0.6s ease-out;
         }
         
         .success-message svg {
@@ -301,8 +375,23 @@
             height: 60px;
             margin-bottom: 20px;
             color: var(--success-color);
+            animation: checkmark 0.6s ease-out;
         }
 
+        @keyframes checkmark {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            80% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
         .cnpj-container {
             display: flex;
             gap: 10px;
@@ -961,6 +1050,19 @@
             if (index === steps.length - 1) {
                 generateSummary();
             }
+            
+            // Anima os campos do formulário ao mudar de passo
+            const formGroups = steps[index].querySelectorAll('.form-group');
+            formGroups.forEach((group, i) => {
+                group.style.opacity = '0';
+                group.style.transform = 'translateY(10px)';
+                group.style.transitionDelay = `${i * 0.05}s`;
+                
+                setTimeout(() => {
+                    group.style.opacity = '1';
+                    group.style.transform = 'translateY(0)';
+                }, 50);
+            });
         }
 
         function generateSummary() {
@@ -1472,6 +1574,28 @@
                     });
                 }
             });
+
+            // Anima os campos do formulário ao carregar
+            const formGroups = document.querySelectorAll('.form-step.active .form-group');
+            formGroups.forEach((group, index) => {
+                group.style.opacity = '0';
+                group.style.transform = 'translateY(10px)';
+                group.style.transition = 'all 0.4s ease-out';
+                group.style.transitionDelay = `${index * 0.05}s`;
+                
+                setTimeout(() => {
+                    group.style.opacity = '1';
+                    group.style.transform = 'translateY(0)';
+                }, 100);
+            });
+            
+            // Anima o botão de submit
+            const submitBtn = document.querySelector('.btn-submit');
+            if (submitBtn) {
+                setTimeout(() => {
+                    submitBtn.style.transform = 'scale(1)';
+                }, 400);
+            }
 
             showStep(currentStep);
         });
