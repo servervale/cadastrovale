@@ -231,6 +231,13 @@
             display: block;
         }
         
+        .success {
+            color: var(--success-color);
+            font-size: 13px;
+            margin-top: 5px;
+            display: block;
+        }
+        
         .error-global {
             background: #fde8e8;
             padding: 12px;
@@ -460,27 +467,27 @@
 
                 <div class="form-group">
                     <label>Endereço <span>*</span></label>
-                    <input type="text" name="endereco_entrega" required placeholder="Rua, Avenida, etc." class="uppercase">
+                    <input type="text" name="endereco_entrega" id="enderecoEntrega" required placeholder="Rua, Avenida, etc." class="uppercase">
                 </div>
 
                 <div class="form-group">
                     <label>Número <span>*</span></label>
-                    <input type="text" name="numero_entrega" required placeholder="Número ou S/N">
+                    <input type="text" name="numero_entrega" id="numeroEntrega" required placeholder="Número ou S/N">
                 </div>
 
                 <div class="form-group">
                     <label>Bairro <span>*</span></label>
-                    <input type="text" name="bairro_entrega" required placeholder="Nome do bairro" class="uppercase">
+                    <input type="text" name="bairro_entrega" id="bairroEntrega" required placeholder="Nome do bairro" class="uppercase">
                 </div>
 
                  <div class="form-group">
                     <label>Complemento (opcional)</label>
-                    <input type="text" name="complemento" placeholder="Casa, Apto, etc..." class="uppercase">
+                    <input type="text" name="complemento_entrega" id="complementoEntrega" placeholder="Casa, Apto, etc..." class="uppercase">
                 </div>
                 
                 <div class="form-group">
                     <label>Cidade <span>*</span></label>
-                    <input type="text" name="cidade_entrega" required placeholder="Nome da cidade" class="uppercase">
+                    <input type="text" name="cidade_entrega" id="cidadeEntrega" required placeholder="Nome da cidade" class="uppercase">
                 </div>
 
                 <div class="form-group">
@@ -491,8 +498,8 @@
                 <div class="form-group">
                     <label>Usar o mesmo endereço para cobrança?</label>
                     <select id="usarMesmoEndereco">
-                        <option value="sim">Não</option>
                         <option value="nao">Sim</option>
+                        <option value="sim">Não</option>
                     </select>
                 </div>
             </div>
@@ -508,22 +515,22 @@
 
                 <div class="form-group">
                     <label>Endereço</label>
-                    <input type="text" name="endereco_cobranca" placeholder="Rua, Avenida, etc." class="uppercase">
+                    <input type="text" name="endereco_cobranca" id="enderecoCobranca" placeholder="Rua, Avenida, etc." class="uppercase">
                 </div>
 
                 <div class="form-group">
                     <label>Número</label>
-                    <input type="text" name="numero_cobranca" placeholder="Número ou S/N">
+                    <input type="text" name="numero_cobranca" id="numeroCobranca" placeholder="Número ou S/N">
                 </div>
 
                 <div class="form-group">
                     <label>Bairro</label>
-                    <input type="text" name="bairro_cobranca" placeholder="Nome do bairro" class="uppercase">
+                    <input type="text" name="bairro_cobranca" id="bairroCobranca" placeholder="Nome do bairro" class="uppercase">
                 </div>
 
                 <div class="form-group">
                     <label>Cidade</label>
-                    <input type="text" name="cidade_cobranca" placeholder="Nome da cidade" class="uppercase">
+                    <input type="text" name="cidade_cobranca" id="cidadeCobranca" placeholder="Nome da cidade" class="uppercase">
                 </div>
             </div>
 
@@ -851,6 +858,65 @@
                 `;
                 btnConsultar.disabled = false;
                 cpfCnpjInput.disabled = false;
+            }
+        }
+
+        // =============================================
+        // CONSULTA CEP CORRIGIDA (FUNCIONANDO)
+        // =============================================
+
+        async function consultarCEP(cep, tipoEndereco = 'entrega') {
+            const cepNumeros = cep.replace(/\D/g, '');
+            
+            if (cepNumeros.length !== 8) {
+                return { success: false, message: 'CEP deve ter 8 dígitos' };
+            }
+
+            try {
+                // Tenta ViaCEP primeiro
+                let response = await fetch(`https://viacep.com.br/ws/${cepNumeros}/json/`);
+                let data = await response.json();
+
+                // Se ViaCEP não encontrar, tenta BrasilAPI
+                if (data.erro) {
+                    response = await fetch(`https://brasilapi.com.br/api/cep/v1/${cepNumeros}`);
+                    data = await response.json();
+                    
+                    if (!data.erro) {
+                        data = {
+                            logradouro: data.street || '',
+                            bairro: data.neighborhood || '',
+                            localidade: data.city || '',
+                            uf: data.state || ''
+                        };
+                    }
+                }
+
+                // Se ainda não encontrou, retorna erro
+                if (data.erro || !data.logradouro) {
+                    throw new Error('CEP não encontrado');
+                }
+
+                // Preenche os campos do formulário
+                const prefix = tipoEndereco === 'entrega' ? 'Entrega' : 'Cobranca';
+                
+                document.getElementById(`endereco${prefix}`).value = data.logradouro ? data.logradouro.toUpperCase() : '';
+                document.getElementById(`bairro${prefix}`).value = data.bairro ? data.bairro.toUpperCase() : '';
+                document.getElementById(`cidade${prefix}`).value = data.localidade ? data.localidade.toUpperCase() : '';
+
+                // Foca no campo número
+                setTimeout(() => {
+                    document.getElementById(`numero${prefix}`).focus();
+                }, 100);
+
+                return { success: true, message: 'Endereço preenchido automaticamente' };
+                
+            } catch (error) {
+                console.error('Erro ao consultar CEP:', error);
+                return { 
+                    success: false, 
+                    message: error.message || 'Erro ao consultar CEP. Preencha manualmente.'
+                };
             }
         }
 
@@ -1277,8 +1343,85 @@
                 mascaraCep(this);
             });
             
+            document.getElementById('cepEntrega').addEventListener('blur', async function() {
+                const cepNumeros = this.value.replace(/\D/g, '');
+                const errorElement = document.getElementById('cepError');
+                
+                if (cepNumeros.length !== 8) {
+                    this.classList.add('invalid');
+                    errorElement.textContent = 'CEP deve ter 8 dígitos';
+                    errorElement.className = 'error';
+                    return;
+                }
+                
+                this.classList.remove('invalid');
+                this.disabled = true;
+                
+                // Mostrar loading
+                const loadingMsg = document.createElement('span');
+                loadingMsg.textContent = 'Consultando CEP...';
+                loadingMsg.style.fontSize = '13px';
+                loadingMsg.style.color = 'var(--primary-color)';
+                loadingMsg.id = 'cepLoading';
+                errorElement.parentNode.insertBefore(loadingMsg, errorElement.nextSibling);
+                
+                try {
+                    const resultado = await consultarCEP(cepNumeros, 'entrega');
+                    
+                    if (resultado.success) {
+                        errorElement.textContent = resultado.message;
+                        errorElement.className = 'success';
+                    } else {
+                        errorElement.textContent = resultado.message;
+                        errorElement.className = 'error';
+                    }
+                } catch (error) {
+                    errorElement.textContent = 'Erro ao consultar CEP. Preencha manualmente.';
+                    errorElement.className = 'error';
+                } finally {
+                    this.disabled = false;
+                    document.getElementById('cepLoading')?.remove();
+                    setTimeout(() => {
+                        errorElement.textContent = '';
+                    }, 5000);
+                }
+            });
+
             document.getElementById('cepCobranca').addEventListener('input', function() {
                 mascaraCep(this);
+            });
+            
+            document.getElementById('cepCobranca').addEventListener('blur', async function() {
+                const cepNumeros = this.value.replace(/\D/g, '');
+                
+                if (cepNumeros.length === 0) return;
+                
+                if (cepNumeros.length !== 8) {
+                    this.classList.add('invalid');
+                    return;
+                }
+                
+                this.classList.remove('invalid');
+                this.disabled = true;
+                
+                // Mostrar loading
+                const loadingMsg = document.createElement('span');
+                loadingMsg.textContent = 'Consultando CEP...';
+                loadingMsg.style.fontSize = '13px';
+                loadingMsg.style.color = 'var(--primary-color)';
+                loadingMsg.id = 'cepCobrancaLoading';
+                
+                const parent = this.parentNode;
+                parent.insertBefore(loadingMsg, this.nextSibling);
+                
+                try {
+                    await consultarCEP(cepNumeros, 'cobranca');
+                } catch (error) {
+                    console.error('Erro ao consultar CEP de cobrança:', error);
+                } finally {
+                    this.disabled = false;
+                    document.getElementById('cepCobrancaLoading')?.remove();
+                }
             });
 
             const emailInput = document.getElementById('emailInput');
@@ -1303,17 +1446,6 @@
                 }
             });
 
-            const cepInput = document.getElementById('cepEntrega');
-            cepInput.addEventListener('blur', function() {
-                if (!validarCEP(this.value.replace(/\D/g, ''))) {
-                    this.classList.add('invalid');
-                    document.getElementById('cepError').textContent = 'CEP deve ter 8 dígitos';
-                } else {
-                    this.classList.remove('invalid');
-                    document.getElementById('cepError').textContent = '';
-                }
-            });
-
             document.getElementById('contribuinteIsento').addEventListener('change', function() {
                 const rgIeInput = document.getElementById('rgIe');
                 const rgIeRequired = document.getElementById('rgIeRequired');
@@ -1326,6 +1458,18 @@
                 } else {
                     rgIeInput.setAttribute('required', '');
                     rgIeRequired.style.display = 'inline';
+                }
+            });
+
+            document.getElementById('usarMesmoEndereco').addEventListener('change', function() {
+                if (this.value === 'sim') {
+                    // Se selecionou "Sim" para usar o mesmo endereço
+                    const camposEntrega = ['cep', 'endereco', 'numero', 'bairro', 'cidade', 'complemento'];
+                    
+                    camposEntrega.forEach(campo => {
+                        const valorEntrega = document.querySelector(`[name="${campo}_entrega"]`).value;
+                        document.querySelector(`[name="${campo}_cobranca"]`).value = valorEntrega;
+                    });
                 }
             });
 
